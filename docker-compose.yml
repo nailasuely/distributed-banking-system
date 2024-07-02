@@ -1,0 +1,58 @@
+version: '3'
+services:
+  bank_a:
+    build:
+      context: ./bank_service
+    ports:
+      - "5301:5301"
+    networks:
+      - bank_network
+    environment:
+      - BANK_ID=A
+    depends_on:
+      - redis
+
+  bank_b:
+    build:
+      context: ./bank_service
+    ports:
+      - "5302:5301"
+    networks:
+      - bank_network
+    environment:
+      - BANK_ID=B
+    depends_on:
+      - redis
+
+  bank_c:
+    build:
+      context: ./bank_service
+    ports:
+      - "5303:5301"
+    networks:
+      - bank_network
+    environment:
+      - BANK_ID=C
+    depends_on:
+      - redis
+
+  transaction_coordinator:
+    build:
+      context: ./transaction_coordinator
+    ports:
+      - "6000:6000"
+    networks:
+      - bank_network
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - bank_network
+
+networks:
+  bank_network:
+    driver: bridge
