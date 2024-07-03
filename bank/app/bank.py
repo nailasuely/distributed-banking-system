@@ -20,7 +20,7 @@ class Cliente:
     def __init__(self, cpf, nome, tipo):
         self.cpf = cpf
         self.nome = nome
-        self.tipo = tipo  # Fisica, Juridica, Conjunta
+        self.tipo = tipo  
         self.contas = []
 
     """
@@ -698,5 +698,5 @@ def status():
     return jsonify({'status': 'ok'}), 200
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(port=5001)
 
