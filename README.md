@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-    <img width="400px" src="https://github.com/nailasuely/so-p-testar/assets/98486996/242182f8-ab37-41b1-a6ce-9324b4896b1c"> 
+    <img width="400px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets%2Fmi%20-%20Concorr%C3%AAncia%20e%20Conectividade.gif"> 
   <br>
   Sistema Bancário Distribuído
   <br>
