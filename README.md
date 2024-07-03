@@ -316,10 +316,11 @@ Dessa forma, o conhecimento adquirido neste projeto pode ser aplicado tanto em s
 
 - Naila Suele
 
-## Tutor
+## Tutores
 
-- Antônio A. T. R. Coutinho
 - Elinaldo Santos de Gois Junior
+- Antônio A. T. R. Coutinho
+
    
 </div>
 
