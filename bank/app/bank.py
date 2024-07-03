@@ -130,7 +130,7 @@ class Banco:
         self.lock = Lock()
         self.bancos_participantes = ["localhost:5000", "localhost:5001", "localhost:5002"]  
         self.transacoes_pendentes = {}
-        self.verificar_bancos_funcionando()
+        self.bancos_funcionando()
          
     """
     Cria um novo cliente e o adiciona na lista de clientes do banco, se o cliente não existir.
@@ -196,7 +196,7 @@ class Banco:
     """
         Verifica se os bancos participantes estão funcionando e atualiza a lista de bancos funcionando.
     """
-    def verificar_bancos_funcionando(self):
+    def bancos_funcionando(self):
         bancos_funcionando_temp = []
         if self.contador != 0: 
             for banco in self.bancos_participantes:
@@ -214,7 +214,7 @@ class Banco:
                 self.bancos_funcionando = bancos_funcionando_temp
         self.contador += 1
 
-        threading.Timer(1000, self.verificar_bancos_funcionando).start()  # Verifica a cada 60 segundos
+        threading.Timer(5, self.bancos_funcionando).start()  
 
     """
         Realiza um depósito na conta mas nao é muito usado pois a conta ja começa com um saldo inicial.

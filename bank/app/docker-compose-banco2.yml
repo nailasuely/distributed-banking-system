@@ -1,19 +1,17 @@
-version: '3.8'
+version: '3.9'
 
 services:
-  banco2:
+  banco:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      - BANCO_NOME=Banco2
-      - BANCO_IP=0.0.0.0
-      - BANCO_PORT=5031
-      - CONSORCIO_IPS=172.16.103.11:5030,192.168.1.12:5032
+    container_name: banco_container
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
     networks:
       - banco_network
-    ports:
-      - "5031:5031"
 
 networks:
   banco_network:
