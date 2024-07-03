@@ -290,6 +290,14 @@ A imagem acima mostra o teste para a verificação das informações dos cliente
 ![-----------------------------------------------------](https://github.com/nailasuely/breakout-problem3/blob/main/assets/img/prancheta.png)
 ## Como utilizar 
 
+1. **Usando Docker:**
+    - Vá até o diretório no qual o `bank` está localizado.
+    - Execute o seguintes comando para iniciar:
+      
+        ```
+        docker-compose up --build
+        ```
+    - Antes, não esqueça de definir o consórcio no código. 
 
 ![-----------------------------------------------------](https://github.com/nailasuely/breakout-problem3/blob/main/assets/img/prancheta.png)
 ## Conclusão 
