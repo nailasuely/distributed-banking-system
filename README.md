@@ -14,7 +14,13 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/nailasuely/Redes-Problem2/blob/main/README.md)
 
 
-> Esse é um projeto da disciplina TEC 502 - Concorrência e Conectividade, no qual ocorre o desenvolvimento de  um sistema de transferências bancárias distribuído. O sistema foi projetado para permitir a criação de contas bancárias e a realização de transações financeiras entre contas de diferentes bancos de forma descentralizada. 
+> Esse é um projeto da disciplina TEC 502 - Concorrência e Conectividade, no qual ocorre o desenvolvimento de  um sistema de transferências bancárias distribuído. O sistema foi projetado para permitir a criação de contas bancárias e a realização de transações financeiras entre contas de diferentes bancos de forma descentralizada.
+> 
+## Download do repositório
+
+```
+gh repo clone nailasuely/distributed-banking-system
+```
 
 </div>
 
@@ -242,13 +248,37 @@ Como falado anteriormente, para tratar os problemas de concorrência e garantir 
 
 ####  Aplicação  
 
+A aplicação funciona como um painel de controle para o gerenciamento de contas bancárias, construída com Next.js e TypeScript (TSX). O sistema fornece uma interface de usuário para a criação de clientes, a abertura de novas contas bancárias e a realização de transações financeiras e visualização dos valores das contas. 
+
+<div align="center">
+   <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar_cliente.png" />
+    <p> Fig 2. Tela de Adicionar Cliente</p>
+</div>
+
+<div align="center">
+   <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar_conta.png" />
+    <p> Fig 3. Tela de Adicionar Conta </p>
+</div>
+
+<div align="center">
+   <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/pix_1.png" />
+    <p> Fig 4. Primeira parte tela de Pix </p>
+</div>
+
+<div align="center">
+   <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/pix_2.png" />
+    <p> Fig 5. Segunda parte tela de Pix</p>
+</div>
+
+Para manter as informações dos dispositivos atualizadas, a aplicação realiza chamadas periódicas para o servidor utilizando o método `fetchData`. Essas chamadas são feitas a cada segundo, garantindo que os dados exibidos na interface estejam sempre atualizados.
+
 ## Testes
 
 Nos testes, além dos realizados diretamente na aplicação React, também foram executados testes utilizando o Postman. Abaixo estão os resultados desses testes realizados por meio do Postman.
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar%20clientes.svg" />
-    <p> Fig 10. Adicionar Clientes</p>
+    <p> Fig 6. Adicionar Clientes</p>
 </div>
 A imagem acima ilustra o teste para adição de clientes ao sistema. O processo é realizado enviando uma solicitação POST para a rota /criar_cliente com os dados necessários, como CPF, nome e tipo de cliente. O teste valida se um cliente novo pode ser adicionado corretamente ao banco, e o retorno esperado é uma confirmação da criação do cliente, com o status HTTP 201 (Criado). 
 
@@ -256,7 +286,7 @@ A imagem acima ilustra o teste para adição de clientes ao sistema. O processo 
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar_contas.svg" />
-    <p> Fig 11. Adicionar Contas </p>
+    <p> Fig 7. Adicionar Contas </p>
 </div>
 Agora esse teste acima mostra o teste para adição de contas para um cliente. A solicitação POST é feita na rota /criar_conta, onde são fornecidos dados como CPF do cliente, número da conta e saldo inicial, se é conta conjunta e se for quais são os titulares (lembrando que essas duas ultimas são opcionais). Este teste verifica se uma nova conta pode ser criada para um cliente existente, e o retorno esperado é uma confirmação da criação da conta, com o status HTTP 201 (Criado).
 
@@ -264,7 +294,7 @@ Agora esse teste acima mostra o teste para adição de contas para um cliente. A
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/verificacao_clientes.svg" />
-    <p> Fig 12. Informações dos clientes antes do pix </p>
+    <p> Fig 8. Informações dos clientes antes do pix </p>
 </div>
 Nesse testeé exibido o teste para a verificação das informações dos clientes antes do pix. Através de uma solicitação GET para a rota /clientes, é possível visualizar todos os clientes registrados no sistema, o que inclui suas contas e saldos. Este teste é realizado para verificar se os dados dos clientes estão corretamente armazenados antes de realizar uma transação de Pix. O retorno que é esperado é uma lista com todas as informações dos clientes e suas contas.
 
@@ -272,7 +302,7 @@ Nesse testeé exibido o teste para a verificação das informações dos cliente
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/pix.svg" />
-    <p> Fig 13. Realização do Pix </p>
+    <p> Fig 9. Realização do Pix </p>
 </div>
 Nesse momento estamos testando o pix em si entre contas. Utilizando a rota /transferencia_composta, são enviados dados para realizar uma transferência entre contas de diferentes clientes e nesse caso nos diferentes bancos, partindo do Banco 0. O teste verifica se a transação é processada corretamente e se o saldo é ajustado conforme esperado. O retorno esperado é uma confirmação da transação com o status HTTP 200 (OK). 
 
@@ -280,7 +310,7 @@ Nesse momento estamos testando o pix em si entre contas. Utilizando a rota /tran
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/apos_pix.svg" />
-    <p> Fig 14. Informações dos clientes após o pix </p>
+    <p> Fig 10. Informações dos clientes após o pix </p>
 </div>
 A imagem acima mostra o teste para a verificação das informações dos clientes após a transação de Pix. Após a realização de uma transferência, uma nova solicitação GET para a rota /clientes é feita para verificar se as alterações no saldo das contas dos clientes foram aplicadas corretamente. O retorno esperado é uma atualização das informações dos clientes para poder visualizar se após o pix os dados estão corretos. 
 
@@ -330,4 +360,7 @@ Dessa forma, o conhecimento adquirido neste projeto pode ser aplicado tanto em s
 > - [1] Python Software Foundation. "threading — Thread-based parallelism." Python 3.12.3 documentation. https://docs.python.org/3/library/threading.html. Acessado em 2024.
 > - [2] Python Software Foundation. "socket — Low-level networking interface." Python 3.12.3 documentation. https://docs.python.org/3/library/socket.html. Acessado em 2024.
 > - [3] Pallets Projects. "Flask Documentation (3.0.x)." Flask. https://flask.palletsprojects.com/en/3.0.x/api/. Acessado em 2024.
-> - [4] Kosinski, Daniel Santos. "A digitalização dos meios de pagamento: o pix e as central bank digital currencies em perspectiva comparada." Textos de Economia 24.1 (2021). Acessado em 2024. 
+> - [4] Kosinski, Daniel Santos. "A digitalização dos meios de pagamento: o pix e as central bank digital currencies em perspectiva comparada." Textos de Economia 24.1 (2021). Acessado em 2024.
+> - [5] JavaScript Mastery. "Build and Deploy a Dashboard Using Next.js 14." Acessado em 2024
+> - [6] Fabricio Veronez. "Docker do zero ao compose: Parte 01." Transmitido ao vivo em 24 de março de 2022.Youtube, https://www.youtube.com/watch?v=GkMJJkWRgBQ&t=2s. Acessado em 2024 
+
