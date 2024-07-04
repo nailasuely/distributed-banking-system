@@ -360,4 +360,7 @@ Dessa forma, o conhecimento adquirido neste projeto pode ser aplicado tanto em s
 > - [1] Python Software Foundation. "threading — Thread-based parallelism." Python 3.12.3 documentation. https://docs.python.org/3/library/threading.html. Acessado em 2024.
 > - [2] Python Software Foundation. "socket — Low-level networking interface." Python 3.12.3 documentation. https://docs.python.org/3/library/socket.html. Acessado em 2024.
 > - [3] Pallets Projects. "Flask Documentation (3.0.x)." Flask. https://flask.palletsprojects.com/en/3.0.x/api/. Acessado em 2024.
-> - [4] Kosinski, Daniel Santos. "A digitalização dos meios de pagamento: o pix e as central bank digital currencies em perspectiva comparada." Textos de Economia 24.1 (2021). Acessado em 2024. 
+> - [4] Kosinski, Daniel Santos. "A digitalização dos meios de pagamento: o pix e as central bank digital currencies em perspectiva comparada." Textos de Economia 24.1 (2021). Acessado em 2024.
+> - [5] JavaScript Mastery. "Build and Deploy a Dashboard Using Next.js 14." Acessado em 2024
+> - [6] Fabricio Veronez. "Docker do zero ao compose: Parte 01." Transmitido ao vivo em 24 de março de 2022.Youtube, https://www.youtube.com/watch?v=GkMJJkWRgBQ&t=2s. Acessado em 2024 
+
