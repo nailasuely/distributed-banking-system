@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-    <img width="400px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets%2Fmi%20-%20Concorr%C3%AAncia%20e%20Conectividade.gif"> 
+    <img width="400px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/logo.gif"> 
   <br>
   Sistema Bancário Distribuído
   <br>
@@ -65,7 +65,7 @@ Para atender aos requisitos e restrições do projeto, o desenvolvimento foi rea
 ## Metodologia 
 
 <div align="center">
- <img width="800px" src="https://github.com/nailasuely/so-p-testar/assets/98486996/c2ad6029-de4a-477d-af40-b8f478faff27">
+ <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/visao_geral.svg">
   <p> Fig 1. Exemplo da Visão Geral </p>
 </div>
 
