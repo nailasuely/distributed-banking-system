@@ -14,8 +14,13 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/nailasuely/Redes-Problem2/blob/main/README.md)
 
 
-> Esse é um projeto da disciplina TEC 502 - Concorrência e Conectividade, no qual ocorre o desenvolvimento de  um sistema de transferências bancárias distribuído. O sistema foi projetado para permitir a criação de contas bancárias e a realização de transações financeiras entre contas de diferentes bancos de forma descentralizada. 
+> Esse é um projeto da disciplina TEC 502 - Concorrência e Conectividade, no qual ocorre o desenvolvimento de  um sistema de transferências bancárias distribuído. O sistema foi projetado para permitir a criação de contas bancárias e a realização de transações financeiras entre contas de diferentes bancos de forma descentralizada.
+> 
+## Download do repositório
 
+```
+gh repo clone nailasuely/distributed-banking-system
+``
 </div>
 
 <details open="open">
