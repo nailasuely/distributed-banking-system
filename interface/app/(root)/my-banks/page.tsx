@@ -40,7 +40,7 @@ const MyBanks = () => {
   // Dados de exemplo 
   const loggedIn = {
     $id: 'user123',
-    firstName: 'John',
+    firstName: 'Teste',
   };
 
   return (

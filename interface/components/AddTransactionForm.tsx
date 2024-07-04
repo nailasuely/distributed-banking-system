@@ -59,7 +59,7 @@ const AddTransactionForm = () => {
 
   const submit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    setFeedback(null); // Resetar feedback ao iniciar a submissão
+    setFeedback(null); 
 
     try {
       const participantes = data.participantes.map((p, index) => ({

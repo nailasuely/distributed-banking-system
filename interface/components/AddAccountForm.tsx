@@ -10,7 +10,7 @@ import * as z from "zod";
 import { Button } from "./ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
-
+import { IP } from "./IP";
 // Define o esquema de validação usando zod
 const formSchema = z.object({
   cpf: z.string().length(11, "O CPF deve ter 11 dígitos").regex(/^\d+$/, "O CPF deve conter apenas números"),
@@ -53,7 +53,7 @@ const AddAccountForm = ({ bancos }: { bancos: { id: string; nome: string }[] }) 
       }
 
       // Faz a requisição para adicionar a conta
-      const response = await fetch(`http://localhost:5000/criar_conta`, {
+      const response = await fetch(`http://${IP}/criar_conta`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
