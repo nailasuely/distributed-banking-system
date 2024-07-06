@@ -1,12 +1,18 @@
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import React from 'react'
-
-const Footer = ({ user, type = 'desktop' }: FooterProps) => {
+const Footer = () => {
   const router = useRouter();
 
+  // Exemplo de dados de usuário
+  const user = {
+    firstName: 'John',
+    email: 'john@example.com',
+  };
 
+  // Definindo o tipo com base na largura da tela
+  const type = typeof window !== 'undefined' && window.innerWidth < 768 ? 'mobile' : 'desktop';
 
   return (
     <footer className="footer">
@@ -26,10 +32,10 @@ const Footer = ({ user, type = 'desktop' }: FooterProps) => {
       </div>
 
       <div className="footer_image">
-        <Image src="icons/logout.svg" fill alt="jsm" />
+        <Image src="/icons/logout.svg" width={24} height={24} alt="Logout Icon" />
       </div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

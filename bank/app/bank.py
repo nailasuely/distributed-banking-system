@@ -130,8 +130,8 @@ class Banco:
         self.clientes = {}
         self.lock = Lock()
         #self.bancos_participantes = ["localhost:5000", "localhost:5001", "localhost:5002", "192.168.0.181:5000", "192.168.0.160:5001"] 
-        #self.bancos_participantes = ["192.168.0.181:5000", "192.168.0.160:5001"]   
-        self.bancos_participantes = ["192.168.0.181:5000", "192.168.0.181:5001", "192.168.0.181:5002"] 
+        #self.bancos_participantes = ["192.168.0.181:5030", "192.168.0.181:5031", "192.168.0.181:5032"]   
+        self.bancos_participantes = ["localhost:5030", "localhost:5031", "localhost:3032"] 
         self.bancos_funcionando = []
         self.transacoes_pendentes = {}
         self.verificar_bancos_funcionando() 
@@ -705,5 +705,5 @@ def status():
     return jsonify({'status': 'ok'}), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5030)
 

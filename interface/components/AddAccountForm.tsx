@@ -11,20 +11,29 @@ import { Button } from "./ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { IP } from "./IP";
+
 // Define o esquema de validação usando zod
 const formSchema = z.object({
   cpf: z.string().length(11, "O CPF deve ter 11 dígitos").regex(/^\d+$/, "O CPF deve conter apenas números"),
   numero: z.string().min(1, "O número da conta é obrigatório"),
-  saldo_inicial: z.string().min(1, "O saldo inicial é obrigatório").refine((val) => !isNaN(parseFloat(val)), {
+  saldo_inicial: z.string().min(1, "O saldo inicial é obrigatório").refine(val => !isNaN(parseFloat(val)), {
     message: "O saldo inicial deve ser um número",
   }),
   conjunta: z.boolean().optional(),
-  titular2: z.string().length(11, "O CPF do segundo titular deve ter 11 dígitos").regex(/^\d+$/, "O CPF do segundo titular deve conter apenas números").optional(),
+  titular2: z.string()
+    .length(11, "O CPF do segundo titular deve ter 11 dígitos")
+    .regex(/^\d+$/, "O CPF do segundo titular deve conter apenas números")
+    .optional()
+}).refine(data => !data.conjunta || (data.conjunta && !!data.titular2), {
+  message: "O CPF do segundo titular é obrigatório para contas conjuntas",
+  path: ['titular2'],
 });
 
-const AddAccountForm = ({ bancos }: { bancos: { id: string; nome: string }[] }) => {
+const AddAccountForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,8 +41,6 @@ const AddAccountForm = ({ bancos }: { bancos: { id: string; nome: string }[] }) 
       cpf: "",
       numero: "",
       saldo_inicial: "0",
-      conjunta: false,
-      titular2: "",
     },
   });
 
@@ -42,15 +49,30 @@ const AddAccountForm = ({ bancos }: { bancos: { id: string; nome: string }[] }) 
 
   const submit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    setError(null); // Limpa mensagens de erro anteriores
+    setSuccess(null); // Limpa mensagens de sucesso anteriores
+
+    console.log("Dados do Formulário:", data);
 
     try {
       // Cria a lista de titulares com o CPF do primeiro titular
       const titulares = [data.cpf];
 
-      // Adiciona o CPF do segundo titular se a conta for conjunta
+      // Adiciona o CPF do segundo titular se a conta for conjunta e titular2 for preenchido
       if (data.conjunta && data.titular2) {
         titulares.push(data.titular2);
       }
+
+      console.log("Titulares Enviados:", titulares);
+
+      // Verificação dos dados antes de enviar a requisição
+      console.log("Dados da Requisição:", {
+        cpf: data.cpf,
+        numero: data.numero,
+        saldo_inicial: parseFloat(data.saldo_inicial),
+        conjunta: data.conjunta || false,
+        titulares,
+      });
 
       // Faz a requisição para adicionar a conta
       const response = await fetch(`http://${IP}/criar_conta`, {
@@ -65,14 +87,20 @@ const AddAccountForm = ({ bancos }: { bancos: { id: string; nome: string }[] }) 
         }),
       });
 
+      console.log("Resposta da Requisição:", response);
+      console.log("Resposta da Requisição (Texto):", await response.text());
+
       if (!response.ok) {
-        throw new Error(`Erro: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Erro: ${response.statusText} - ${errorText}`);
       }
 
       form.reset();
-      router.push("/");
+      setSuccess("Conta criada com sucesso!");
+      setTimeout(() => router.push("/"), 2000); // Redireciona após 2 segundos
     } catch (error) {
       console.error("Falha ao criar a conta: ", error);
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +109,17 @@ const AddAccountForm = ({ bancos }: { bancos: { id: string; nome: string }[] }) 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(submit)} className="flex flex-col">
-      
+        {success && (
+          <div className="mb-4 p-2 text-green-700 bg-green-100 rounded border border-green-300">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-2 text-red-700 bg-red-100 rounded border border-red-300">
+            {error}
+          </div>
+        )}
+        
         <FormField
           control={form.control}
           name="cpf"

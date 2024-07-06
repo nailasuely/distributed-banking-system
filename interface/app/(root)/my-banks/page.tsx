@@ -24,7 +24,7 @@ const MyBanks = () => {
   useEffect(() => {
     const fetchClientes = async () => {
       try {
-        const response = await fetch('http://${IP}/clientes');
+        const response = await fetch(`http://${IP}/clientes`);
         const data: Cliente[] = await response.json();
         setClientes(data);
       } catch (error) {

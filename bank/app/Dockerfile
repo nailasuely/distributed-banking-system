@@ -1,15 +1,12 @@
-# Use a imagem Python oficial.
-# https://hub.docker.com/_/python
 FROM python:3.9-slim
 
-# Sete o diretório de trabalho para /app
+COPY . ./app
 WORKDIR /app
 
-# Copie o arquivo atual para o contêiner em /app
-COPY . .
+COPY requirements.txt .
 
-# Instale os requisitos do aplicativo
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
-# Execute o aplicativo quando o contêiner iniciar
+EXPOSE 5030
+
 CMD ["python", "bank.py"]

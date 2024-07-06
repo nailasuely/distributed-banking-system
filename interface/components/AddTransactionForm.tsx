@@ -10,7 +10,7 @@ import * as z from "zod";
 import { Button } from "./ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
-import { getBancos } from "@/lib/actions/bank.actions"; // Importando a função para obter os bancos
+import { getBancos } from "@/lib/actions/bank.actions";
 import { IP } from "./IP";
 
 const participantSchema = z.object({

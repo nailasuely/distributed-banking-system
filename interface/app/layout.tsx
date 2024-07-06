@@ -1,8 +1,8 @@
-import MobileNav from "@/components/MobileNav";
+
 import Sidebar from "@/components/Sidebar";
-import { getLoggedInUser } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+
 
 import type { Metadata } from "next";
 import { Inter, IBM_Plex_Serif } from "next/font/google";
@@ -36,11 +36,11 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${ibmPlexSerif.variable}`}>
         <main className="flex h-screen w-full font-inter">
-          <Sidebar user={loggedIn} />
+          <Sidebar />
           <div className="flex flex-grow flex-col">
             <div className="root-layout">
               <Image src="/icons/logo.svg" width={30} height={30} alt="logo" />
-              <MobileNav user={loggedIn} />
+              
             </div>
             {children}
           </div>

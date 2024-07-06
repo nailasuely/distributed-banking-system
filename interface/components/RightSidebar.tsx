@@ -4,8 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import BankCard from './BankCard';
-import { countTransactionCategories } from '@/lib/utils';
-import Category from './Category';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { IP } from '@/components/IP';
 
@@ -15,7 +14,6 @@ interface RightSidebarProps {
     $id: string;
     firstName: string;
   };
-  transactions: Transaction[];
   banks: {
     id: string;
     appwriteItemId: string;
@@ -26,12 +24,8 @@ interface RightSidebarProps {
   onlineBanks: { id: string; status: string }[];  // Adicione a nova prop para bancos online
 }
 
-const RightSidebar = ({ user, transactions, banks, onlineBanks }: RightSidebarProps) => {
-  const [categories, setCategories] = useState<CategoryCount[]>([]);
+const RightSidebar = ({ user, banks, onlineBanks }: RightSidebarProps) => {
   
-  useEffect(() => {
-    setCategories(countTransactionCategories(transactions));
-  }, [transactions]);
 
   return (
     <aside className="right-sidebar">

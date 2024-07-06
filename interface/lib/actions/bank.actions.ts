@@ -3,7 +3,7 @@ import { IP } from "@/components/IP";
 
 export const getBancos = async () => {
   try {
-    const response = await fetch('http://${IP}/bancos_on');
+    const response = await fetch(`http://${IP}/bancos_on`); 
     if (!response.ok) {
       throw new Error(`Erro ao obter bancos: ${response.statusText}`);
     }

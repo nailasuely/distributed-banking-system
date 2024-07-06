@@ -6,42 +6,37 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { IP } from "./IP";
 
 import { Button } from "./ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
-import { IP } from "./IP";
 
-// Definindo o esquema de validação com zod
 const formSchema = z.object({
   cpf: z.string().length(11, "O CPF deve ter 11 dígitos").regex(/^\d+$/, "O CPF deve conter apenas números"),
   nome: z.string().min(1, "O nome é obrigatório"),
-  tipo: z.enum(["Fisica", "Juridica"], {
-    errorMap: () => ({ message: "Tipo inválido. Deve ser 'Física' ou 'Jurídica'" }),
-  }),
+  tipo: z.string().min(1, "Selecione o tipo de conta"),
 });
 
 const AddClientForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  // Configuração do useForm com zodResolver
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cpf: "",
       nome: "",
-      tipo: "Fisica",
+      tipo: "",
     },
   });
 
-  const { register, handleSubmit, formState: { errors } } = form;
-
-
   const submit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    setFeedback(null); 
+    setError(null); // Limpa 
+    setSuccess(null); // Limpa
 
     try {
       const response = await fetch(`http://${IP}/criar_cliente`, {
@@ -51,21 +46,15 @@ const AddClientForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Erro: ${response.statusText}`);
+        throw new Error(`Erro ao criar cliente`);
       }
 
       form.reset();
-      router.push("/");
-      setFeedback({ type: "success", message: "Cliente adicionado com sucesso!" });
-
-      setTimeout(() => {
-        form.reset();
-        router.push("/");
-      }, 2000);
-
+      setSuccess("Cliente adicionado com sucesso!");
+      setTimeout(() => router.push("/"), 2000); // Redireciona após 2 segundos
     } catch (error) {
-      console.error("Falha ao adicionar o cliente: ", error);
-      setFeedback({ type: "error", message: "Falha ao adicionar o cliente. Tente novamente." });
+      console.error("Falha ao criar o cliente: ", error);
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
@@ -73,45 +62,17 @@ const AddClientForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={handleSubmit(submit)} className="flex flex-col">
-        <div className="payment-transfer_form-details">
-          <h2 className="text-18 font-semibold text-gray-900">
-            Adicionar Cliente
-          </h2>
-          <p className="text-16 font-normal text-gray-600">
-            Preencha os detalhes do novo cliente
-          </p>
-        </div>
-
-        <FormField
-          control={form.control}
-          name="cpf"
-          render={({ field }) => (
-            <FormItem className="border-t border-gray-200">
-              <div className="payment-transfer_form-item pb-6 pt-5">
-                <div className="payment-transfer_form-content">
-                  <FormLabel className="text-14 font-medium text-gray-700">
-                    CPF do Cliente
-                  </FormLabel>
-                  <FormDescription className="text-12 font-normal text-gray-600">
-                    Informe o CPF do cliente
-                  </FormDescription>
-                </div>
-                <div className="flex w-full flex-col">
-                  <FormControl>
-                    <Input
-                      placeholder="CPF do cliente"
-                      className="input-class"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-12 text-red-500" />
-                </div>
-              </div>
-            </FormItem>
-          )}
-        />
-
+      <form onSubmit={form.handleSubmit(submit)} className="flex flex-col">
+        {success && (
+          <div className="mb-4 p-2 text-green-700 bg-green-100 rounded border border-green-300">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 p-2 text-red-700 bg-red-100 rounded border border-red-300">
+            {error}
+          </div>
+        )}
         <FormField
           control={form.control}
           name="nome"
@@ -129,7 +90,36 @@ const AddClientForm = () => {
                 <div className="flex w-full flex-col">
                   <FormControl>
                     <Input
-                      placeholder="Nome do cliente"
+                      placeholder="Nome do Cliente"
+                      className="input-class"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-12 text-red-500" />
+                </div>
+              </div>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cpf"
+          render={({ field }) => (
+            <FormItem className="border-t border-gray-200">
+              <div className="payment-transfer_form-item pb-6 pt-5">
+                <div className="payment-transfer_form-content">
+                  <FormLabel className="text-14 font-medium text-gray-700">
+                    CPF do Cliente
+                  </FormLabel>
+                  <FormDescription className="text-12 font-normal text-gray-600">
+                    Informe o CPF do cliente (11 dígitos)
+                  </FormDescription>
+                </div>
+                <div className="flex w-full flex-col">
+                  <FormControl>
+                    <Input
+                      placeholder="CPF do Cliente"
                       className="input-class"
                       {...field}
                     />
@@ -149,17 +139,18 @@ const AddClientForm = () => {
               <div className="payment-transfer_form-item pb-6 pt-5">
                 <div className="payment-transfer_form-content">
                   <FormLabel className="text-14 font-medium text-gray-700">
-                    Tipo de Cliente
+                    Tipo de Conta
                   </FormLabel>
                   <FormDescription className="text-12 font-normal text-gray-600">
-                    Selecione o tipo de cliente (Física ou Jurídica)
+                    Selecione o tipo de conta do cliente
                   </FormDescription>
                 </div>
                 <div className="flex w-full flex-col">
                   <FormControl>
                     <select {...field} className="input-class">
-                      <option value="Fisica">Física</option>
-                      <option value="Juridica">Jurídica</option>
+                      <option value="">Selecione o tipo de conta</option>
+                      <option value="corrente">Física</option>
+                      <option value="poupanca">Jurídica</option>
                     </select>
                   </FormControl>
                   <FormMessage className="text-12 text-red-500" />
@@ -169,7 +160,7 @@ const AddClientForm = () => {
           )}
         />
 
-        <div className="payment-transfer_btn-box mt-4">
+        <div className="payment-transfer_btn-box">
           <Button type="submit" className="payment-transfer_btn">
             {isLoading ? (
               <>
@@ -180,11 +171,6 @@ const AddClientForm = () => {
             )}
           </Button>
         </div>
-        {feedback && (
-          <div className={`mt-4 text-center text-14 ${feedback.type === "success" ? "text-green-500" : "text-red-500"}`}>
-            {feedback.message}
-          </div>
-        )}
       </form>
     </Form>
   );

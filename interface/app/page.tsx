@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import HeaderBox from '@/components/HeaderBox';
-import RecentTransactions from '@/components/RecentTransactions';
 import RightSidebar from '@/components/RightSidebar';
 import TotalBalanceBox from '@/components/TotalBalanceBox';
+import { IP } from "@/components/IP";
+
 
 const Home = () => {
   const [totalBanks, setTotalBanks] = useState(0);
@@ -13,23 +14,22 @@ const Home = () => {
   const [totalCurrentBalance, setTotalCurrentBalance] = useState(0);
   const [accounts, setAccounts] = useState<{ id: string; appwriteItemId: string; name: string; balance: number; numero: string }[]>([]);
   const [onlineBanks, setOnlineBanks] = useState<{ id: string; status: string }[]>([]);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [user, setUser] = useState<{ $id: string; firstName: string }>({ $id: 'user123', firstName: 'John' });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Obtemos os bancos para contar
-        const responseBanks = await fetch('http://localhost:5000/bancos_on');
+        const responseBanks = await fetch(`http://${IP}/bancos_on`); 
         const bancos = await responseBanks.json();
         setOnlineBanks(bancos.map((url: string) => ({
           id: url,
-          status: url.includes('5000') ? 'on' : 'off'
+          status: url.includes('5030') ? 'on' : 'off'
         })));
         setTotalBanks(bancos.length);
 
         // Obtemos os clientes e contas
-        const responseClients = await fetch('http://localhost:5000/clientes');
+        const responseClients = await fetch(`http://${IP}/clientes`);
         const clientes = await responseClients.json();
 
         // Contamos os clientes
@@ -55,11 +55,6 @@ const Home = () => {
         setTotalAccounts(accountsList.length);
         setTotalCurrentBalance(totalBalance);
         setAccounts(accountsList);
-
-        // Obtemos as transações
-        const responseTransactions = await fetch('http://localhost:5000/transacoes');
-        const transacoes = await responseTransactions.json();
-        setTransactions(transacoes);
 
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
@@ -91,7 +86,6 @@ const Home = () => {
 
       <RightSidebar 
         user={user}
-        transactions={transactions}
         banks={accounts}
         onlineBanks={onlineBanks}
       />
