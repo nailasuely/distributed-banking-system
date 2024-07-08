@@ -54,7 +54,6 @@ const AddClientForm = () => {
       setTimeout(() => router.push("/"), 2000); // Redireciona após 2 segundos
     } catch (error) {
       console.error("Falha ao criar o cliente: ", error);
-      setError(error.message);
     } finally {
       setIsLoading(false);
     }

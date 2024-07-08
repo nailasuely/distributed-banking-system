@@ -64,7 +64,7 @@ const MyBanks = () => {
                   <BankCard 
                     key={`${cliente.cpf}-${index}`}
                     account={{ id: conta.numero, appwriteItemId: conta.numero, name: cliente.nome, balance: conta.saldo, numero: conta.numero }}
-                    userName={cliente.nome} // Passando o nome do cliente
+                    userName={cliente.cpf} // Passando o nome do cliente
                   />
                 ))
               )

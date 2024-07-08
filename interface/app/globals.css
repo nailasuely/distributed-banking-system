@@ -376,3 +376,166 @@
     @apply text-16 font-semibold text-black-2 max-xl:hidden;
   }
 }
+
+/* Modal Styles */
+.category-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.size-2 {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+/* styles/globals.css */
+
+/* styles/globals.css */
+
+/* Main Container */
+.mt-6 {
+  margin-top: 1.5rem; /* 1.5rem = 24px */
+}
+
+/* Header */
+.text-2xl {
+  font-size: 1.5rem; /* 1.5rem = 24px */
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem; /* 1.5rem = 24px */
+}
+
+/* Cards */
+.bg-white {
+  background-color: #ffffff;
+}
+
+.p-6 {
+  padding: 1.5rem; /* 1.5rem = 24px */
+}
+
+.rounded-lg {
+  border-radius: 0.5rem; /* 8px */
+}
+
+.shadow-lg {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.transition-transform {
+  transition: transform 0.3s ease;
+}
+
+.transform {
+  transform: scale(1);
+}
+
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Grid */
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.sm\:grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.md\:grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.gap-6 {
+  gap: 1.5rem; /* 1.5rem = 24px */
+}
+
+/* Text */
+.text-lg {
+  font-size: 1.125rem; /* 1.125rem = 18px */
+}
+
+.text-gray-700 {
+  color: #4a5568;
+}
+
+.text-gray-900 {
+  color: #1a202c;
+}
+
+.text-2xl {
+  font-size: 1.5rem; /* 1.5rem = 24px */
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* Image */
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.w-24 {
+  width: 6rem; /* 6rem = 96px */
+}
+
+.h-24 {
+  height: 6rem; /* 6rem = 96px */
+}
+
+.flex {
+  display: flex;
+}
+/* styles/globals.css */
+
+/* Adicionando sombra rosa ao passar o mouse */
+.hover\:shadow-rose-400:hover {
+  --tw-shadow-color: #f43f5e; /* Cor rosa */
+  box-shadow: 0 4px 6px rgba(244, 63, 94, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.object-contain {
+  object-fit: contain;
+}

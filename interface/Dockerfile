@@ -18,7 +18,7 @@ COPY . .
 RUN npm run build
 
 # Exponha a porta 3000 para acesso externo (ajuste conforme necessário)
-EXPOSE 3000
+EXPOSE 3005
 
 # Comando para iniciar a aplicação
 CMD ["npm", "start"]

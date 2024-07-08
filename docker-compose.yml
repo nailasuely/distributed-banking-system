@@ -1,10 +1,10 @@
-version: '3.8'
+version: '3.7'
 
 services:
   client:
-    build: .
+    build: 
+      context: ./interface
     ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-    command: ["npm", "start"]  # Certifique-se de que isso corresponde ao script start no package.json
+      - "3005:3000"
+
+

@@ -28,21 +28,21 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
               {account.name}
             </h1>
             <p className="font-ibm-plex-serif font-black text-white">
-             
+            R$ {account.balance}
             </p>
           </div>
 
           <article className="flex flex-col gap-2">
             <div className="flex justify-between">
               <h1 className="text-12 font-semibold text-white">
-                {userName}
+              {userName}
               </h1>
               <h2 className="text-12 font-semibold text-white">
                 {account.numero}
               </h2>
             </div>
             <p className="text-14 font-semibold tracking-[1.1px] text-white">
-              {account.numero}
+             ●●●● ●●●● ●●●● <span className="text-16">{account.numero}</span>
             </p>
           </article>
         </div>

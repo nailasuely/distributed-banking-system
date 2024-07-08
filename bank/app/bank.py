@@ -131,8 +131,11 @@ class Banco:
         self.lock = Lock()
         #self.bancos_participantes = ["localhost:5000", "localhost:5001", "localhost:5002", "192.168.0.181:5000", "192.168.0.160:5001"] 
         #self.bancos_participantes = ["192.168.0.181:5030", "192.168.0.181:5031", "192.168.0.181:5032"]   
-        self.bancos_participantes = ["localhost:5030", "localhost:5031", "localhost:3032"] 
+        self.bancos_participantes = ["localhost:5030", "localhost:5031", "localhost:5032"] 
+        #self.bancos_participantes = ["172.16.103.12:5030", "172.16.103.13:5030", "172.16.103.11:5030"] 
+
         self.bancos_funcionando = []
+        self.historico_transacoes = {}
         self.transacoes_pendentes = {}
         self.verificar_bancos_funcionando() 
          
@@ -157,7 +160,24 @@ class Banco:
             else:
                 logging.warning(f"Cliente já existe: CPF {cpf}")
                 return None
-            
+
+
+    def conta_existente(self, numero):
+        """
+        Verifica se um número de conta já existe no banco.
+        
+        Args:
+            numero (str): Número da conta.
+        
+        Returns:
+            bool: True se a conta já existe, False caso contrário.
+        """
+        for cliente in self.clientes.values():
+            for conta in cliente.contas:
+                if conta.numero == numero:
+                    return True
+        return False
+           
     def criar_conta(self, cpf, numero, saldo_inicial=0, conjunta=False, titulares=None):
         """
         Cria conta.
@@ -176,27 +196,73 @@ class Banco:
             if not titulares:
                 titulares = [cpf]
 
+            if self.conta_existente(numero):
+                logging.warning(f"Número da conta {numero} já existe.")
+                return None
+            
             for titular in titulares:
                 cliente = self.clientes.get(titular)
                 if cliente:
-                    conta_individual_existente = any(not c.titulares for c in cliente.contas)
-                    if conta_individual_existente and not conjunta:
-                        logging.warning(f"Cliente {titular} já possui uma conta individual e não é conjunta.")
+                    # Verifica se a conta é individual e se já existe uma conta individual para o cliente
+                    if not conjunta and any(not c.titulares or (len(c.titulares) == 1 and c.titulares[0] == titular) for c in cliente.contas):
+                        logging.warning(f"Cliente {titular} já possui uma conta individual e não pode ter outra.")
                         return None
-
+                else:
+                    logging.warning(f"Cliente não encontrado: {titular}")
+                    return None
+            
             nova_conta = Conta(numero, saldo_inicial, titulares)
             
             for titular in titulares:
                 cliente = self.clientes.get(titular)
                 if cliente:
-                    cliente.contas.append(nova_conta)
+                    cliente.adicionar_conta(nova_conta)
                 else:
                     logging.warning(f"Cliente não encontrado: {titular}")
                     return None
                 
             logging.info(f"Conta criada: {numero} para os titulares: {', '.join(titulares)}")
-            return nova_conta.__dict__
+            return nova_conta.to_dict()
 
+    def registrar_transacao(self, id_transacao, status, detalhes, transacao=None):
+        logging.info("\n\nta entrando aqui \n\n")
+        """
+        Registra uma transação no histórico com seu status, detalhes e a transação completa.
+        
+        Args:
+            id_transacao (str): Identificador único da transação.
+            status (str): Status da transação (Sucesso, Andamento, Falha).
+            detalhes (str): Detalhes da transação.
+            transacao (dict, opcional): Detalhes completos da transação (opcional).
+        """
+        with self.lock:
+            self.historico_transacoes[id_transacao] = {
+                'status': status,
+                'detalhes': detalhes,
+                'transacao': transacao
+            }
+        logging.info(f"Transação registrada: ID: {id_transacao}, Status: {status}, Detalhes: {detalhes}, Transação: {transacao}")
+
+    def get_registro_transacoes(self):
+        """
+        Retorna o registro de todas as transações.
+        
+        Returns:
+            list: Lista de dicionários com o histórico de transações.
+        """
+        with self.lock:
+            return list(self.historico_transacoes.values())
+        
+    def get_transacoes_pendentes(self):
+        """
+        Retorna o registro de todas as transações.
+        
+        Returns:
+            list: Lista de dicionários com o histórico de transações.
+        """
+        with self.lock:
+            return list(self.transacoes_pendentes.values())
+        
     """
         Verifica se os bancos participantes estão funcionando e atualiza a lista de bancos funcionando.
     """
@@ -295,6 +361,21 @@ class Banco:
         logging.warning(f"Transferência falhou: Conta(s) não encontrada(s) ou saldo insuficiente")
         return False
 
+    def commit_transacao(self, id_transacao):
+        """
+        Comita uma transação no banco de dados.
+        
+        Args:
+            id_transacao (str): Identificador único da transação.
+        """
+        if id_transacao in self.transacoes_pendentes:
+            transacao = self.transacoes_pendentes[id_transacao]
+            del self.transacoes_pendentes[id_transacao]
+            self.registrar_transacao(id_transacao, 'Completada', 'Transação completada e removida das pendências', transacao)
+            return True
+        return False
+
+
     def transferencia_composta(self, transacao):
         """
         Realiza uma transferência composta ou simples.
@@ -336,7 +417,8 @@ class Banco:
                         "banco": participante['banco'],
                         "banco_destino": banco_destino,
                         "numero_destino": conta_destino_numero,
-                        "cpf_destino": cpf_destino
+                        "cpf_destino": cpf_destino,
+                        "valor_total": valor_total
 
                     }]
                 }
@@ -350,17 +432,19 @@ class Banco:
                     total_prepared = False
                     bancos_falharam_prepare.append(request["url"])
                     logging.warning(f"Preparação falhou para transação ID: {transacao['id']} no participante {request['url']}")
+                    self.registrar_transacao(transacao['id'], 'Falha', f"Prepare falhou no participante {request['url']}", transacao)
                     break  
             except requests.RequestException as e:
                 total_prepared = False
                 bancos_falharam_prepare.append(request["url"])
                 logging.error(f"Erro ao comunicar com participante {request['url']}: {e}")
+                self.registrar_transacao(transacao['id'], 'Falha', f"Erro ao comunicar com participante {request['url']}: {e}", transacao)
                 # se prepare falhar aí para
                 break  
 
         if total_prepared:
             logging.info("\nTodos os bancos estão prepadados\n")
-            time.sleep(5)
+            #time.sleep(10)
             # Se tudo der certo faz o commit
             all_commit_success = True  # variavel de controle
             for participante in transacao['participantes']:
@@ -376,6 +460,11 @@ class Banco:
                             "valor": valor_total  # Credita o valor total calculado
                         }
                     })
+                    commit_url = f"http://{ip}:{porta}/commit"
+                    commit_requests.append({
+                        "url": commit_url,
+                        "json": {"id": transacao['id']}
+                    })
                 else:
                     commit_url = f"http://{ip}:{porta}/commit"
                     commit_requests.append({
@@ -390,16 +479,23 @@ class Banco:
                     if response.status_code != 200:
                         all_commit_success = False  # false em caso de falha
                         logging.warning(f"Commit falhou para transação ID: {transacao['id']} no participante {request['url']}")
+                        self.registrar_transacao(transacao['id'], 'Falha', f"Commit falhou no participante {request['url']}", transacao)
                         # adiciona a transacao de falha para ela ser revertida. 
                         self.transacoes_pendentes[transacao['id']] = transacao['participantes']
                         logging.info(f"Transação ID: {transacao['id']} adicionada às pendências para possível retry")
                         break  # se um commit falhar, não faz rollback
                 except requests.RequestException as e:
                     all_commit_success = False  # Modifica a variável para false em caso de erro
+                    
                     logging.error(f"Erro ao comunicar com participante {request['url']}: {e}")
+                    self.registrar_transacao(transacao['id'], 'Falha', f"Erro ao comunicar com participante {request['url']}: {e}", transacao)
+                    self.transacoes_pendentes[transacao['id']] = transacao['participantes']
+                    logging.info(f"Transação ID: {transacao['id']} adicionada às pendências para possível retry")
                     break  # se um commit falhar, não faz rollback
 
             if not all_commit_success:
+                logging.info(f"Transação ID: {transacao['id']} adicionada às pendências para ver oq acontece")
+                self.transacoes_pendentes[transacao['id']] = transacao['participantes']
                 # se o commit falhar faz o rollback 
                 for participante in transacao['participantes']:
                     banco_participante = participante['banco']
@@ -414,11 +510,13 @@ class Banco:
                         requests.post(request["url"], json=request["json"])
                     except requests.RequestException as e:
                         logging.error(f"Erro ao comunicar com participante {request['url']}: {e}")
-                
+
+                self.registrar_transacao(transacao['id'], 'Falha', 'Rollback executado devido ao falha no commit', transacao)
                 return False  # a transação falhou e foi revertida
             else:
                 # Após o commit feito, remove a transação das pendências
                 self.commit_transacao(transacao['id'])
+                self.registrar_transacao(transacao['id'], 'Sucesso', 'Transação completada com sucesso', transacao)
                 return True  # feito corretamente 
         else:
             logging.info("\nTodos os bancos NAO estãos prepadados\n")
@@ -467,21 +565,27 @@ class Banco:
         """
         transacao_id = transacao['id']
         self.transacoes_pendentes[transacao_id] = transacao['participantes']
+        self.registrar_transacao(transacao_id, 'Andamento', 'Transação está sendo preparada', transacao)
         # Verifica se tem saldo na conta.
         for participante in transacao['participantes']:
             cpf = participante['cpf']
             numero = participante['numero']
             valor = participante['valor']
             cliente = self.clientes.get(cpf)
-            if cliente:
-                conta = next((c for c in cliente.contas if c.numero == numero), None)
-                if not conta:
-                    logging.error(f"Conta com número {numero} não encontrada para o cliente com CPF {cpf}.")
-                    return False
-                if conta.saldo < valor:
-                    logging.info(f"\n\nNão há saldo suficiente na conta número {numero}. Saldo disponível: {conta.saldo}\n")
-                    return False
-        # faz a reserva do valor 
+            if not cliente:
+                logging.error(f"Cliente com CPF {cpf} não encontrado.")
+                self.registrar_transacao(transacao_id, 'Falha', f"Cliente com CPF {cpf} não encontrado.", transacao)
+                return False
+            conta = next((c for c in cliente.contas if c.numero == numero), None)
+            if not conta:
+                logging.error(f"Conta com número {numero} não encontrada para o cliente com CPF {cpf}.")
+                self.registrar_transacao(transacao_id, 'Falha', f"Conta com número {numero} não encontrada para o cliente com CPF {cpf}.", transacao)
+                return False
+            if conta.saldo < valor:
+                logging.info(f"\n\nNão há saldo suficiente na conta número {numero}. Saldo disponível: {conta.saldo}\n")
+                self.registrar_transacao(transacao_id, 'Falha', f"Não há saldo suficiente na conta número {numero}. Saldo disponível: {conta.saldo}.", transacao)
+                return False
+        # Faz a reserva do valor
         for participante in transacao['participantes']:
             cpf = participante['cpf']
             valor = participante['valor']
@@ -491,31 +595,30 @@ class Banco:
                 if conta:
                     logging.info(f"\n\nantes aqui conta: {participante['numero']}\n conta destino {participante['numero_destino']}")
                     logging.info(f"\n\nantes aqui banco participante: {participante['banco']}\n banco destino {participante['banco_destino']}")
-                    if participante['banco'] != participante['banco_destino'] and participante['numero'] != participante['numero_destino']:  # Não reserva valor no banco destino)
-                        conta.saldo -= valor
-                    if participante['banco'] == participante['banco_destino'] and participante['numero'] != participante['numero_destino']:
-                        logging.info(f"Deve ser uma tranferencia interna") 
-                        if participante['cpf'] != participante['cpf_destino']:
+                    with self.lock:  # Adiciona o bloqueio para a manipulação da conta
+                        if participante['banco'] != participante['banco_destino'] and participante['numero'] != participante['numero_destino']:  # Não reserva valor no banco destino)
                             conta.saldo -= valor
+                        if participante['banco'] == participante['banco_destino'] and participante['numero'] != participante['numero_destino']:
+                            logging.info(f"Deve ser uma tranferencia interna") 
+                            if participante['cpf'] != participante['cpf_destino']:
+                                conta.saldo -= valor
+
+        self.registrar_transacao(transacao_id, 'Sucesso', 'Transação preparada com sucesso', transacao)
         return True
 
+    def creditar(self, cpf, numero, valor):
+        with self.lock:  # Adiciona o bloqueio para garantir que a operação de crédito é atômica
+            cliente = self.clientes.get(cpf)
+            if cliente:
+                conta = next((c for c in cliente.contas if c.numero == numero), None)
+                if conta:
+                    conta.depositar(valor)  # Deposita o valor total calculado
+                    logging.info(f"Crédito realizado: {valor} na conta: {numero} do cliente: {cpf}")
+                    #self.registrar_transacao(f"{cpf}-{numero}", 'Sucesso', f"Crédito realizado: {valor} na conta: {numero}", None)
+                    return True
+            logging.warning(f"Crédito falhou: Cliente ou conta não encontrado: CPF {cpf}, Conta {numero}")
+            return False
 
-    def commit_transacao(self, transacao_id):
-        """
-        Confirma uma transação composta se todas as verificações de preparação forem feitas
-        Remove a transação das transações pendentes e confirma que a transação foi feita
-
-        Args:
-            transacao_id (str): Id único da transação que precisa ser commitada.
-
-        Returns:
-            bool: Retorna True se a transação foi confirmada, False caso contrário.
-        """
-        if transacao_id in self.transacoes_pendentes:
-            #logging.info(f"\n\n ta deletando aqui")
-            del self.transacoes_pendentes[transacao_id]
-            return True
-        return False
 
     def abort_transacao(self, transacao):
         """
@@ -531,7 +634,7 @@ class Banco:
         transacao_id = transacao['id']
         logging.info(f"\ntrasacao_id: {transacao['id']}\ntransacoes pendentes> {self.transacoes_pendentes}")
         if transacao_id in self.transacoes_pendentes:
-            # abort aqui 
+            # Abort aqui 
             for participante in self.transacoes_pendentes[transacao_id]:
                 cpf = participante['cpf']
                 numero = participante['numero']
@@ -541,23 +644,12 @@ class Banco:
                     conta = next((c for c in cliente.contas if c.numero == numero), None)
                     if conta:
                         logging.info(f"\nem abort\nvalor: {participante['valor']}\nconta: {participante['numero']}\n")
-                        conta.saldo += valor
+                        with self.lock:  # Adiciona o bloqueio para a manipulação da conta
+                            conta.saldo += valor
             del self.transacoes_pendentes[transacao_id]
+            self.registrar_transacao(transacao_id, 'Abortada', 'Transação abortada e removida das pendências', transacao)
             return True
         return False
-
-    def creditar(self, cpf, numero, valor):
-        with self.lock:
-            cliente = self.clientes.get(cpf)
-            if cliente:
-                conta = next((c for c in cliente.contas if c.numero == numero), None)
-                if conta:
-                    conta.depositar(valor)  # Deposita o valor total calculado
-                    logging.info(f"Crédito realizado: {valor} na conta: {numero} do cliente: {cpf}")
-                    return True
-            logging.warning(f"Crédito falhou: Cliente ou conta não encontrado: CPF {cpf}, Conta {numero}")
-            return False
-
 
 
 
@@ -699,6 +791,28 @@ def creditar_route():
         return jsonify({"success": True}), 200
     return jsonify({"error": "Crédito falhou"}), 400
 
+@app.route('/historico', methods=['GET'])
+def get_transacoes():
+    """
+    Rota para obter o registro de todas as transações.
+    
+    Returns:
+        Response: Resposta JSON com a lista de transações.
+    """
+    transacoes = banco.get_registro_transacoes()
+    return jsonify(transacoes)
+
+
+@app.route('/pendentes', methods=['GET'])
+def get_pendentes():
+    """
+    Rota para obter o registro de todas as transações.
+    
+    Returns:
+        Response: Resposta JSON com a lista de transações.
+    """
+    transacoes = banco.get_transacoes_pendentes()
+    return jsonify(transacoes)
 
 @app.route('/status', methods=['GET'])
 def status():
@@ -706,4 +820,3 @@ def status():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5030)
-

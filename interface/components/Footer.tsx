@@ -7,8 +7,8 @@ const Footer = () => {
 
   // Exemplo de dados de usuário
   const user = {
-    firstName: 'John',
-    email: 'john@example.com',
+    firstName: 'Naila',
+    email: 'nailasuely@gmail.com',
   };
 
   // Definindo o tipo com base na largura da tela
