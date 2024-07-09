@@ -27,29 +27,29 @@ gh repo clone nailasuely/distributed-banking-system
 <details open="open">
 <summary>Sumário</summary>
 
-- [Introdução](#Introdução)
+ [Introdução](#Introdução)
 - [Tecnologias e Ferramentas Utilizadas](#Tecnologias-e-Ferramentas-Utilizadas)
 - [Metodologia](#Metodologia)
   - [Cliente](#Classe-Cliente)
   - [Conta](#Classe-Conta)
   - [Banco](#Classe-Banco)
-  - [Comunicação entre Servidores (Bancos)](#Comunicação-entre-Bancos)
-- [Discussão sobre os requisitos](#Discussão-sobre-os-requisitos)
-  - [O sistema realiza o gerenciamento de contas? Criar e realizar transações?](#O-sistema-realiza-o-gerenciamento-de-contas-Criar-e-realizar-transações)
-  - [É possível transacionar entre diferentes bancos? Por exemplo, enviar do banco A, B e C, para o banco D?](#É-possível-transacionar-entre-diferentes-bancos-por-exemplo-enviar-do-banco-a-b-b-e-c-para-o-banco-d)
-  - [Os bancos estão se comunicando com o protocolo adequado?](#Os-bancos-estão-se-comunicando-com-o-protocolo-adequado)
-  - [Como tratou a concorrência em um único servidor, quando chegam mais de um pedido de transação a um único servidor?](#Como-tratou-a-concorrência-em-um-único-servidor-quando-chegam-mais-de-um-pedido-de-transação-a-um-único-servidor)
-  - [Algoritmo da concorrência distribuída está teoricamente bem empregado?](#Algoritmo-da-concorrência-distribuída-está-teoricamente-bem-empregado)
-  - [A implementação do algoritmo está funcionando corretamente?](#A-implementação-do-algoritmo-está-funcionando-correttamente)
-  - [Quando um dos bancos perde a conexão, o sistema continua funcionando corretamente? E quando o banco retorna à conexão?](#Quando-um-dos-bancos-perde-a-conexão-o-sistema-continua-funcionando-correttamente-E-quando-o-banco-retorna-à-conexão)
-  - [Pelo menos uma transação concorrente é realizada?](#Pelo-menos-uma-transação-concorrente-é-realizada)
+  - [Comunicação entre Bancos](#Comunicação-entre-Bancos)
+- [Discussão](#Discussão-sobre-os-requisitos)
+  - [Gerenciamento de Contas e Transações](#O-sistema-realiza-o-gerenciamento-de-contas-Criar-e-realizar-transações)
+  - [Transações Entre Bancos](#É-possível-transacionar-entre-diferentes-bancos-por-exemplo-enviar-do-banco-a-b-b-e-c-para-o-banco-d)
+  - [Protocolo de Comunicação](#Os-bancos-estão-se-comunicando-com-o-protocolo-adequado)
+  - [Concorrência no Servidor](#Como-tratou-a-concorrência-em-um-único-servidor-quando-chegam-mais-de-um-pedido-de-transação-a-um-único-servidor)
+  - [Concorrência Distribuída](#Algoritmo-da-concorrência-distribuída-está-teoricamente-bem-empregado)
+  - [Implementação do Algoritmo](#A-implementação-do-algoritmo-está-funcionando-correttamente)
+  - [Conexão de Bancos](#Quando-um-dos-bancos-perde-a-conexão-o-sistema-continua-funcionando-correttamente-E-quando-o-banco-retorna-à-conexão)
+  - [Transações Concorrentes](#Pelo-menos-uma-transação-concorrente-é-realizada)
 - [Testes](#Testes)
 - [Como utilizar](#Como-utilizar)
 - [Conclusão](#Conclusão)
 - [Equipe](#equipe)
 - [Tutor](#tutor)
 - [Referências](#referências)
-
+  
 </details>
 
 
