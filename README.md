@@ -27,7 +27,7 @@ gh repo clone nailasuely/distributed-banking-system
 <details open="open">
 <summary>Sumário</summary>
 
- [Introdução](#Introdução)
+- [Introdução](#Introdução)
 - [Tecnologias e Ferramentas Utilizadas](#Tecnologias-e-Ferramentas-Utilizadas)
 - [Metodologia](#Metodologia)
   - [Cliente](#Classe-Cliente)
