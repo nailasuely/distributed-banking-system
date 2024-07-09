@@ -34,6 +34,15 @@ gh repo clone nailasuely/distributed-banking-system
   - [Conta](#Classe-Conta)
   - [Banco](#Classe-Banco)
   - [Comunicação entre Servidores (Bancos)](#Comunicação-entre-Bancos)
+- [Discussão sobre os requisitos](#Discussão-sobre-os-requisitos)
+  - [O sistema realiza o gerenciamento de contas? Criar e realizar transações?](#O-sistema-realiza-o-gerenciamento-de-contas-Criar-e-realizar-transações)
+  - [É possível transacionar entre diferentes bancos? Por exemplo, enviar do banco A, B e C, para o banco D?](#É-possível-transacionar-entre-diferentes-bancos-por-exemplo-enviar-do-banco-a-b-b-e-c-para-o-banco-d)
+  - [Os bancos estão se comunicando com o protocolo adequado?](#Os-bancos-estão-se-comunicando-com-o-protocolo-adequado)
+  - [Como tratou a concorrência em um único servidor, quando chegam mais de um pedido de transação a um único servidor?](#Como-tratou-a-concorrência-em-um-único-servidor-quando-chegam-mais-de-um-pedido-de-transação-a-um-único-servidor)
+  - [Algoritmo da concorrência distribuída está teoricamente bem empregado?](#Algoritmo-da-concorrência-distribuída-está-teoricamente-bem-empregado)
+  - [A implementação do algoritmo está funcionando corretamente?](#A-implementação-do-algoritmo-está-funcionando-correttamente)
+  - [Quando um dos bancos perde a conexão, o sistema continua funcionando corretamente? E quando o banco retorna à conexão?](#Quando-um-dos-bancos-perde-a-conexão-o-sistema-continua-funcionando-correttamente-E-quando-o-banco-retorna-à-conexão)
+  - [Pelo menos uma transação concorrente é realizada?](#Pelo-menos-uma-transação-concorrente-é-realizada)
 - [Testes](#Testes)
 - [Como utilizar](#Como-utilizar)
 - [Conclusão](#Conclusão)
@@ -271,6 +280,87 @@ A aplicação funciona como um painel de controle para o gerenciamento de contas
 </div>
 
 Para manter as informações dos dispositivos atualizadas, a aplicação realiza chamadas periódicas para o servidor utilizando o método `fetchData`. Essas chamadas são feitas a cada segundo, garantindo que os dados exibidos na interface estejam sempre atualizados.
+
+![-----------------------------------------------------](https://github.com/nailasuely/breakout-problem3/blob/main/assets/img/prancheta.png)
+
+## Discussão sobre os requisitos
+
+### O sistema realiza o gerenciamento de contas? Criar e realizar transações?
+
+![Imagem conta_nova](link-da-imagem-conta-nova)
+
+Sim. O sistema realiza o gerenciamento de contas por meio através de rotas HTTP POST (Figura) , usando a implementação de funções para a criação de contas bancárias. Para isso, é utilizando a classe `Cliente`, que representa um cliente do banco com atributos como CPF, nome e tipo, e a classe `Conta`, que gerencia detalhes como número da conta, saldo e titulares, o sistema permite a criação de clientes e as contas que estão associadas a este cliente. O método `/criar_cliente` adiciona novos clientes ao sistema, verificando se já existem. Para as contas, o método `/criar_conta` assegura que cada conta é única e pode ser individual ou conjunta,  e outros métodos de validação para que não exista problema em contas conjuntas, lembrando que as contas conjuntas nesse sistema permitem até apenas dois participantes. O uso de locks (`Lock`) é feito na criação de conta, pois em um ambiente multithread como é o caso desse sistema ocorre a prevenção de condições de corridas que podem acontecer em um ambiente descentralizado e evita a criação de contas iguais. 
+
+E sim, também é permitido realizar transações financeiras. Elas são feitas por meio de várias rotas HTTP POST e cada uma delas representa um tipo de operação. Para depósitos, a rota `/depositar` aceita uma requisição JSON que precisa conter o CPF do cliente, o número da conta e o valor inicial que a conta deve ter. O sistema processa a requisição e dependendo do que foi enviado e válido pelo sistema ela pode retornar um status de sucesso. Parecido com o processo de depósito, a rota `/sacar` permite que os valores sejam retirados de alguma conta, fazendo a verificação do saldo que tem antes de processar o saque. Em casos onde a transferência envolve múltiplos bancos, ou até mesmo dois, temos a rota `/transferencia_composta`. Ela também precisa de uma requisição JSON com a lista de participantes, incluindo o banco coordenador que é o primeiro que é colocado na lista e o banco que vai receber que é o último da lista e os bancos participantes se for uma transação que envolve mais de dois bancos. 
+
+### É possível transacionar entre diferentes bancos? Por exemplo, enviar do banco A, B e C, para o banco D?
+
+Sim, o sistema permite transacionar entre diferentes bancos, usando a rota `/transferencia_composta`, que aceita uma requisição JSON com detalhes da transação, incluindo um identificador único da transação e uma lista de participantes. Cada participante da lista inclui informações como o banco de origem, CPF, número da conta, e o valor a ser transferido. Lembrando que o banco destino, apesar de precisar do campo valor, ele não interfere em nada, pois o valor que o banco destino irá receber é a soma de valores das contas participantes (incluindo a coordenador). Na interface React (figura que ta a imagem de fazer transferência), o campo valor para destino não aparece por esse motivo.
+
+Quando a requisição de transferência composta é recebida, o sistema inicia o processo de transferência ao comunicar-se com cada banco participante. O sistema pergunta para cada banco se ele está pronto para realizar a transferência do valor. Se todos os bancos envolvidos confirmarem que podem realizar a transferência, o sistema prossegue e executa a transferência dos fundos dos bancos A, B e C para a conta no banco D. Se todos os bancos conseguirem realizar a transferência corretamente, o valor total transferido é somado e creditado na conta do banco D. Uma imagem simples para representar essa verificação é a seguinte:
+
+![Imagem de verificação](link-da-imagem-de-verificacao)
+
+### Os bancos estão se comunicando com o protocolo adequado?
+
+Sim, os bancos estão se comunicando com o protocolo adequado, utilizando HTTP e JSON (JavaScript Object Notation) para as trocas de informações. O protocolo HTTP é amplamente utilizado para comunicação entre servidores por ser considerado um protocolo descomplicado. No sistema bancário as requisições entre os servidores dos bancos são realizadas principalmente utilizando o método POST com os dados que são necessários para a requisição.
+
+Essas requisições são melhores explicadas na Seção Comunicação entre bancos. [Ir para seção aqui.](#Comunicação-entre-Bancos)
+
+### Como tratou a concorrência em um único servidor, quando chegam mais de um pedido de transação a um único servidor?
+
+Quando um pedido de transação chega ao servidor, a primeira medida é o uso de **bloqueios**. Esses bloqueios são formas de garantir que apenas uma transação possa acessar ou modificar um recurso compartilhado por vez. No código, o uso de um bloqueio (`self.lock`) faz com que operações críticas como a atualização do saldo da conta ou a preparação e o commit de uma transação composta não sejam realizadas simultaneamente por diferentes transações. Isso evita que duas ou mais transações interfiram umas nas outras, o que poderia levar a erros como a falta de saldo ou a duplicação de transferências.
+
+O processo é coordenado em duas fases principais durante o ciclo de vida de uma transação composta. Na **fase de preparação**, a transação verifica se todas as contas envolvidas têm saldo suficiente e reserva o valor para garantir que a transação possa ser completada. Durante essa fase, os bloqueios garantem que as alterações no saldo das contas sejam feitas. Se qualquer uma das contas não atender aos requisitos, o sistema pode abortar a transação e passar essa informação para todos os participantes.
+
+Se todas as contas passam na fase de preparação, o sistema passa para a **fase de commit**. Aqui, o sistema tenta aplicar todas as mudanças de uma vez, usando os bloqueios. Se todas as operações de commit forem bem-sucedidas, a transação é concluída e todas as mudanças são salvas e removidas das pendências. Caso contrário, a fase de rollback é iniciada para reverter quaisquer alterações feitas durante a fase de preparação, e o sistema tenta resolver a situação de maneira que o estado do banco permaneça consistente.
+
+Para mostrar um exemplo, imagine que temos dois clientes A e B que podem fazer mudanças sobre a mesma conta que possui um saldo de R$ 1.000,00.
+
+**Transação do Cliente A:** O Cliente A pede uma transferência de R$ 200,00. O sistema coloca um bloqueio na conta, verifica o saldo, e realiza a transferência. Nesse tempo, o sistema impede qualquer outra operação na conta.
+
+**Transação do Cliente B:** Enquanto o Cliente A está realizando a transferência, imagine que o Cliente B tenta retirar R$ 300,00 da mesma conta. Como o bloqueio está ativo, a requisição do Cliente B é colocada em uma fila e espera até que o Cliente A finalize a operação. Uma vez que o Cliente A conclui a transferência e o saldo é atualizado para R$ 800,00, o bloqueio é removido, permitindo que a transação do Cliente B prossiga com a nova verificação de saldo e o saque de R$ 300,00.
+
+### Algoritmo da concorrência distribuída está teoricamente bem empregado?
+
+O **Two-Phase Commit Protocol (2PC)** é o algoritmo de concorrência distribuída empregado no código que é considerado um protocolo clássico para a atomicidade e a consistência de dados em sistemas distribuídos. E, em menor grau, **Two-Phase Locking (2PL)**. Embora esse último não seja implementado diretamente, ele segue princípios similares ao garantir a atomicidade e a consistência das transações distribuídas.
+
+O protocolo 2PC segue duas fases principais: a fase de preparação e a fase de commit.
+
+**Fase de Preparação**: No código, a fase de preparação é iniciada no método `transferencia_composta`. Nessa fase, o sistema envia um pedido de **prepare** para todos os bancos participantes da transação. O objetivo dessa etapa é garantir que todos os participantes estejam prontos para prosseguir com a transação e que não haja problemas que impeçam a realização da operação, como saldo insuficiente em uma conta. Cada banco, ao receber o pedido de prepare, verifica se pode cumprir com o compromisso e responde ao coordenador da transação. No código, se um dos bancos responde com uma falha ou se ocorre um erro ao tentar enviar o pedido de prepare, a transação é considerada falha e o processo é interrompido.
+
+**Fase de Commit**: Se todos os bancos respondem afirmativamente durante a fase de preparação, o sistema passa para a fase de commit. Nesta fase, o código envia um pedido de **commit** para todos os bancos para que eles efetivem a transação. Se qualquer banco falha durante a fase de commit, a transação é revertida. O código executa um **rollback** chamando o endpoint `/abort` em todos os bancos participantes para reverter quaisquer alterações feitas durante a fase de preparação. Se a fase de commit é bem-sucedida, a transação é removida das pendências e registrada como completa. A abordagem do 2PC no código está teoricamente correta, pois segue a estrutura do protocolo, garantindo que todas as partes da transação possam ser atualizadas ou revertidas.
+
+O método `preparar_transacao` realiza a verificação de saldo e reserva os fundos, o que corresponde a uma das verificações cruciais do 2PC antes da fase de commit. Ele assegura que há fundos suficientes e que todas as contas e clientes existem antes de tentar processar a transação. Esta fase também inclui um bloqueio para garantir que a manipulação do saldo das contas seja atômica, para evitar condições de corrida entre transações concorrentes.
+
+Além disso, mesmo que o **Two-Phase Locking (2PL)** não seja explicitamente implementado no código, o conceito de bloqueio é presente. O 2PL é um algoritmo de controle de concorrência que usa duas fases distintas para gerenciar o acesso a recursos compartilhados e garantir a serialização das transações.
+
+No código, a ideia de garantir a consistência durante a transação é refletida na forma como o saldo das contas é manipulado de maneira atômica, o que é um conceito central no 2PL. O bloqueio é implementado usando um **lock** para garantir que a manipulação das contas é feita de maneira segura e sem interferências de outras transações concorrentes.
+
+O uso de `self.lock` no método `preparar_transacao` e `creditar` para fazer com que as operações de crédito e débito sejam atômicas é um reflexo dos princípios do 2PL.
+
+### A implementação do algoritmo está funcionando corretamente?
+
+Na prática, a implementação do Two-Phase Commit Protocol (2PC) no código está lidando com a coordenação de transações distribuídas. Ele realiza a sequência esperada de preparação e commit das transações entre múltiplos participantes, garantindo que todas as partes envolvidas cheguem a um consenso sobre o estado da transação. Além disso, o código implementa alguns métodos para lidar com falhas durante o processo, como o rollback adequado em caso de falhas de comunicação ou indisponibilidade de algum participante. Isso faz com que as transações sejam concluídas de maneira consistente ou revertidas corretamente quando necessário, atendendo aos requisitos de integridade e atomicidade esperados.
+
+No entanto, enquanto a implementação atual do 2PC funciona corretamente para transações básicas, ela pode apresentar desafios em cenários mais complexos. Por exemplo, em situações de alta concorrência ou falhas de rede prolongadas, o uso de um lock global para manipulação de contas pode se tornar um ponto de gargalo, afetando o desempenho geral do sistema.
+
+### Quando um dos bancos perde a conexão, o sistema continua funcionando corretamente? E quando o banco retorna à conexão?
+
+Sim. Quando ocorre o envio da preparação da transação, se o banco perde a conexão, o sistema detecta a falha e imediatamente inicia o processo de rollback. O código foi desenvolvido para identificar falhas de comunicação e, ao encontrar uma falha durante a fase de preparação, não apenas registra a falha, mas também adiciona a transação às pendências para uma possível tentativa de nova execução. Além disso, a interface do sistema garante que apenas bancos "online" sejam considerados ao enviar requisições, evitando assim o envio para bancos fora do ar.
+
+Se a falha de comunicação ocorrer após ou durante a fase de preparação, o sistema entra em um estado de espera, tentando enviar as requisições de commit ou rollback repetidamente até que a conexão seja restabelecida. Durante esse período, o sistema continua a processar a transação e, uma vez que a conexão é recuperada, ele tenta concluir a transação enviando as requisições. Caso a conexão volte ao normal, a transação é finalizada corretamente.
+
+### Pelo menos uma transação concorrente é realizada?
+
+Sim. A implementação atual faz com que ocorra a realização de pelo menos uma transação concorrente. A função `transferencia_composta` exige comunicação e coordenação entre várias instâncias do banco. As requisições de `prepare`, `commit` e `abort` são feitas a diferentes participantes, e a gestão das transações é realizada por meio de um dicionário de pendências, assegurando a execução concorrente das operações.
+
+A concorrência é gerida por meio da implementação de um `lock`, que garante a consistência nas operações de depósito e saque, prevenindo condições de corrida e assegurando que múltiplas transações possam ser processadas sem interferências mútuas. O `lock` mantém a integridade dos dados ao assegurar que operações críticas, como alterações de saldo, sejam realizadas de forma atômica.
+
+O método prepara uma lista de requisições para preparar, comprometer ou reverter transações, as quais podem ser feitas simultaneamente a múltiplos participantes. Isso é evidenciado pelo uso de listas para armazenar requisições de `prepare`, `commit` e `rollback`, e pelo fato de que essas requisições são enviadas em paralelo, permitindo a execução concorrente das transações. Além disso, a função `preparar_transacao` verifica e reserva os valores necessários para a transação, enquanto `commit_transacao` e `abort_transacao` lidam com a conclusão ou reversão das transações.
+
+
+![-----------------------------------------------------](https://github.com/nailasuely/breakout-problem3/blob/main/assets/img/prancheta.png)
 
 ## Testes
 
