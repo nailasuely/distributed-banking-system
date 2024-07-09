@@ -287,9 +287,15 @@ Para manter as informações dos dispositivos atualizadas, a aplicação realiza
 
 ### O sistema realiza o gerenciamento de contas? Criar e realizar transações?
 
-![Imagem conta_nova](link-da-imagem-conta-nova)
 
-Sim. O sistema realiza o gerenciamento de contas por meio através de rotas HTTP POST (Figura) , usando a implementação de funções para a criação de contas bancárias. Para isso, é utilizando a classe `Cliente`, que representa um cliente do banco com atributos como CPF, nome e tipo, e a classe `Conta`, que gerencia detalhes como número da conta, saldo e titulares, o sistema permite a criação de clientes e as contas que estão associadas a este cliente. O método `/criar_cliente` adiciona novos clientes ao sistema, verificando se já existem. Para as contas, o método `/criar_conta` assegura que cada conta é única e pode ser individual ou conjunta,  e outros métodos de validação para que não exista problema em contas conjuntas, lembrando que as contas conjuntas nesse sistema permitem até apenas dois participantes. O uso de locks (`Lock`) é feito na criação de conta, pois em um ambiente multithread como é o caso desse sistema ocorre a prevenção de condições de corridas que podem acontecer em um ambiente descentralizado e evita a criação de contas iguais. 
+
+Sim. O sistema realiza o gerenciamento de contas por meio através de rotas HTTP POST (Figura 6) , usando a implementação de funções para a criação de contas bancárias. Para isso, é utilizando a classe `Cliente`, que representa um cliente do banco com atributos como CPF, nome e tipo, e a classe `Conta`, que gerencia detalhes como número da conta, saldo e titulares, o sistema permite a criação de clientes e as contas que estão associadas a este cliente. O método `/criar_cliente` adiciona novos clientes ao sistema, verificando se já existem. Para as contas, o método `/criar_conta` assegura que cada conta é única e pode ser individual ou conjunta,  e outros métodos de validação para que não exista problema em contas conjuntas, lembrando que as contas conjuntas nesse sistema permitem até apenas dois participantes. O uso de locks (`Lock`) é feito na criação de conta, pois em um ambiente multithread como é o caso desse sistema ocorre a prevenção de condições de corridas que podem acontecer em um ambiente descentralizado e evita a criação de contas iguais. 
+
+<div align="center">
+   <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/conta_nova.svg" />
+    <p> Fig 6. Protocolo de criação de conta</p>
+</div>
+
 
 E sim, também é permitido realizar transações financeiras. Elas são feitas por meio de várias rotas HTTP POST e cada uma delas representa um tipo de operação. Para depósitos, a rota `/depositar` aceita uma requisição JSON que precisa conter o CPF do cliente, o número da conta e o valor inicial que a conta deve ter. O sistema processa a requisição e dependendo do que foi enviado e válido pelo sistema ela pode retornar um status de sucesso. Parecido com o processo de depósito, a rota `/sacar` permite que os valores sejam retirados de alguma conta, fazendo a verificação do saldo que tem antes de processar o saque. Em casos onde a transferência envolve múltiplos bancos, ou até mesmo dois, temos a rota `/transferencia_composta`. Ela também precisa de uma requisição JSON com a lista de participantes, incluindo o banco coordenador que é o primeiro que é colocado na lista e o banco que vai receber que é o último da lista e os bancos participantes se for uma transação que envolve mais de dois bancos. 
 
@@ -299,7 +305,10 @@ Sim, o sistema permite transacionar entre diferentes bancos, usando a rota `/tra
 
 Quando a requisição de transferência composta é recebida, o sistema inicia o processo de transferência ao comunicar-se com cada banco participante. O sistema pergunta para cada banco se ele está pronto para realizar a transferência do valor. Se todos os bancos envolvidos confirmarem que podem realizar a transferência, o sistema prossegue e executa a transferência dos fundos dos bancos A, B e C para a conta no banco D. Se todos os bancos conseguirem realizar a transferência corretamente, o valor total transferido é somado e creditado na conta do banco D. Uma imagem simples para representar essa verificação é a seguinte:
 
-![Imagem de verificação](link-da-imagem-de-verificacao)
+<div align="center">
+   <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/composta_d.svg" />
+    <p> Fig 7. Exemplo de Transferência Composta </p>
+</div>
 
 ### Os bancos estão se comunicando com o protocolo adequado?
 
@@ -325,12 +334,16 @@ Para mostrar um exemplo, imagine que temos dois clientes A e B que podem fazer m
 
 O **Two-Phase Commit Protocol (2PC)** é o algoritmo de concorrência distribuída empregado no código que é considerado um protocolo clássico para a atomicidade e a consistência de dados em sistemas distribuídos. E, em menor grau, **Two-Phase Locking (2PL)**. Embora esse último não seja implementado diretamente, ele segue princípios similares ao garantir a atomicidade e a consistência das transações distribuídas.
 
-O protocolo 2PC segue duas fases principais: a fase de preparação e a fase de commit.
+O protocolo 2PC segue duas fases principais: a fase de preparação e a fase de commit(Figura 8).
 
 **Fase de Preparação**: No código, a fase de preparação é iniciada no método `transferencia_composta`. Nessa fase, o sistema envia um pedido de **prepare** para todos os bancos participantes da transação. O objetivo dessa etapa é garantir que todos os participantes estejam prontos para prosseguir com a transação e que não haja problemas que impeçam a realização da operação, como saldo insuficiente em uma conta. Cada banco, ao receber o pedido de prepare, verifica se pode cumprir com o compromisso e responde ao coordenador da transação. No código, se um dos bancos responde com uma falha ou se ocorre um erro ao tentar enviar o pedido de prepare, a transação é considerada falha e o processo é interrompido.
 
 **Fase de Commit**: Se todos os bancos respondem afirmativamente durante a fase de preparação, o sistema passa para a fase de commit. Nesta fase, o código envia um pedido de **commit** para todos os bancos para que eles efetivem a transação. Se qualquer banco falha durante a fase de commit, a transação é revertida. O código executa um **rollback** chamando o endpoint `/abort` em todos os bancos participantes para reverter quaisquer alterações feitas durante a fase de preparação. Se a fase de commit é bem-sucedida, a transação é removida das pendências e registrada como completa. A abordagem do 2PC no código está teoricamente correta, pois segue a estrutura do protocolo, garantindo que todas as partes da transação possam ser atualizadas ou revertidas.
 
+<div align="center">
+   <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/caso_1_sucesso.svg" />
+    <p> Fig 8. Exemplo de de prepare e commit em um caso de sucesso na tranferência </p>
+</div>
 O método `preparar_transacao` realiza a verificação de saldo e reserva os fundos, o que corresponde a uma das verificações cruciais do 2PC antes da fase de commit. Ele assegura que há fundos suficientes e que todas as contas e clientes existem antes de tentar processar a transação. Esta fase também inclui um bloqueio para garantir que a manipulação do saldo das contas seja atômica, para evitar condições de corrida entre transações concorrentes.
 
 Além disso, mesmo que o **Two-Phase Locking (2PL)** não seja explicitamente implementado no código, o conceito de bloqueio é presente. O 2PL é um algoritmo de controle de concorrência que usa duas fases distintas para gerenciar o acesso a recursos compartilhados e garantir a serialização das transações.
@@ -368,7 +381,7 @@ Nos testes, além dos realizados diretamente na aplicação React, também foram
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar%20clientes.svg" />
-    <p> Fig 6. Adicionar Clientes</p>
+    <p> Fig 9. Adicionar Clientes</p>
 </div>
 A imagem acima ilustra o teste para adição de clientes ao sistema. O processo é realizado enviando uma solicitação POST para a rota /criar_cliente com os dados necessários, como CPF, nome e tipo de cliente. O teste valida se um cliente novo pode ser adicionado corretamente ao banco, e o retorno esperado é uma confirmação da criação do cliente, com o status HTTP 201 (Criado). 
 
@@ -376,7 +389,7 @@ A imagem acima ilustra o teste para adição de clientes ao sistema. O processo 
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar_contas.svg" />
-    <p> Fig 7. Adicionar Contas </p>
+    <p> Fig 10. Adicionar Contas </p>
 </div>
 Agora esse teste acima mostra o teste para adição de contas para um cliente. A solicitação POST é feita na rota /criar_conta, onde são fornecidos dados como CPF do cliente, número da conta e saldo inicial, se é conta conjunta e se for quais são os titulares (lembrando que essas duas ultimas são opcionais). Este teste verifica se uma nova conta pode ser criada para um cliente existente, e o retorno esperado é uma confirmação da criação da conta, com o status HTTP 201 (Criado).
 
@@ -384,7 +397,7 @@ Agora esse teste acima mostra o teste para adição de contas para um cliente. A
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/verificacao_clientes.svg" />
-    <p> Fig 8. Informações dos clientes antes do pix </p>
+    <p> Fig 11. Informações dos clientes antes do pix </p>
 </div>
 Nesse testeé exibido o teste para a verificação das informações dos clientes antes do pix. Através de uma solicitação GET para a rota /clientes, é possível visualizar todos os clientes registrados no sistema, o que inclui suas contas e saldos. Este teste é realizado para verificar se os dados dos clientes estão corretamente armazenados antes de realizar uma transação de Pix. O retorno que é esperado é uma lista com todas as informações dos clientes e suas contas.
 
@@ -392,7 +405,7 @@ Nesse testeé exibido o teste para a verificação das informações dos cliente
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/pix.svg" />
-    <p> Fig 9. Realização do Pix </p>
+    <p> Fig 12. Realização do Pix </p>
 </div>
 Nesse momento estamos testando o pix em si entre contas. Utilizando a rota /transferencia_composta, são enviados dados para realizar uma transferência entre contas de diferentes clientes e nesse caso nos diferentes bancos, partindo do Banco 0. O teste verifica se a transação é processada corretamente e se o saldo é ajustado conforme esperado. O retorno esperado é uma confirmação da transação com o status HTTP 200 (OK). 
 
@@ -400,7 +413,7 @@ Nesse momento estamos testando o pix em si entre contas. Utilizando a rota /tran
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/apos_pix.svg" />
-    <p> Fig 10. Informações dos clientes após o pix </p>
+    <p> Fig 13. Informações dos clientes após o pix </p>
 </div>
 A imagem acima mostra o teste para a verificação das informações dos clientes após a transação de Pix. Após a realização de uma transferência, uma nova solicitação GET para a rota /clientes é feita para verificar se as alterações no saldo das contas dos clientes foram aplicadas corretamente. O retorno esperado é uma atualização das informações dos clientes para poder visualizar se após o pix os dados estão corretos. 
 
