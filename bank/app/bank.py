@@ -128,9 +128,8 @@ class Banco:
     def __init__(self):
         self.contador = 0
         self.clientes = {}
-        self.lock = Lock()
-        #self.bancos_participantes = ["localhost:5000", "localhost:5001", "localhost:5002", "192.168.0.181:5000", "192.168.0.160:5001"] 
-        #self.bancos_participantes = ["192.168.0.181:5030", "192.168.0.181:5031", "192.168.0.181:5032"]   
+        self.lock = Lock() 
+        # o indice do banco é o número relacionado ao banco na transferência
         self.bancos_participantes = ["localhost:5030", "localhost:5031", "localhost:5032"] 
         #self.bancos_participantes = ["172.16.103.12:5030", "172.16.103.13:5030", "172.16.103.11:5030"] 
 
@@ -819,4 +818,4 @@ def status():
     return jsonify({'status': 'ok'}), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5030)
+    app.run(host='0.0.0.0', port=5032)
