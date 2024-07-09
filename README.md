@@ -435,15 +435,15 @@ A imagem acima mostra o teste para a verificação das informações dos cliente
           ```
       - Antes, não esqueça de definir o consórcio no código. 
   - Como executar a interface:
-        - Vá até o diretório principal.
-           ```bash
-           cd distributed-banking-system
-           ```
-        - Execute o seguinte comando para iniciar:
-            ```
-            docker-compose up --build
-            ```
-        - Antes, não esqueça de definir o IP em `components`. 
+      - Vá até o diretório principal.
+         ```bash
+         cd distributed-banking-system
+         ```
+      - Execute o seguinte comando para iniciar:
+          ```
+          docker-compose up --build
+          ```
+      - Antes, não esqueça de definir o IP em `components`. 
 ![-----------------------------------------------------](https://github.com/nailasuely/breakout-problem3/blob/main/assets/img/prancheta.png)
 ## Conclusão 
 Por fim, o projeto conseguiu desenvolver um sistema para gerenciamento de transações bancárias distribuídas, permitindo a comunicação eficiente entre diferentes bancos e contas. No qual ocorreu a implementação de funcionalidades essenciais como criação de contas, realização de transações, transferências entre bancos e sincronização de dados.
