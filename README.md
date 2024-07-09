@@ -59,7 +59,7 @@ gh repo clone nailasuely/distributed-banking-system
 
 O Pix foi desenvolvido para centralizar o processo de transações financeiras sob a supervisão do Banco Central, garantindo que todas as operações sejam gerenciadas de forma segura (Kosinski, 2021). Esse modelo centralizado permite um controle direto sobre todas as transações e é uma evolução das formas tradicionais de pagamento, oferecendo uma solução rápida e moderna para movimentações financeiras (Kosinski, 2021).
 
-Inspirados por esse modelo, esse projeto apresenta uma abordagem um pouco diferente em comparação com o Pix tradicional. Enquanto o Pix opera sob um modelo centralizado, onde o Banco Central atua como um intermediário essencial para todas as transações, nossa solução adota um modelo descentralizado para o gerenciamento de contas e a execução de transferências. A ideia é criar um sistema que permita a realização de transações financeiras sem a necessidade de uma autoridade central, em um ambiente distribuído onde os próprios bancos participantes coordenam as operações diretamente entre si.
+Inspirados por esse modelo, esse projeto apresenta uma abordagem um pouco diferente em comparação ao Pix tradicional. Enquanto o Pix opera sob um modelo centralizado, onde o Banco Central atua como um intermediário essencial para todas as transações, essa solução adota um modelo descentralizado para o gerenciamento de contas e a execução de transferências. A ideia é criar um sistema que permita a realização de transações financeiras sem a necessidade de uma autoridade central, em um ambiente distribuído onde os próprios bancos participantes coordenam as operações diretamente entre si.
 
 Para atender aos requisitos e restrições do projeto, o desenvolvimento foi realizado utilizando Python para o backend e contêineres Docker para isolar e gerenciar os ambientes de cada banco. A comunicação entre os bancos é feita por meio de uma API REST e o protocolo  2PC (Two-Phase Commit) foi utilizado para coordenar transações de forma confiável entre os bancos e os ambientes foram gerenciados usando Docker. 
 
@@ -86,7 +86,7 @@ Para atender aos requisitos e restrições do projeto, o desenvolvimento foi rea
 
 A arquitetura do sistema foi desenvolvida com o objetivo de criar uma solução em um conceito no qual cada banco atua como um servidor que gerencia suas próprias contas, clientes e transações. O servidor do banco gerencia as transações financeiras e lida com a concorrência para garantir que as operações sejam realizadas de forma que não ocorra problemas nos valores. O algoritmo Two-Phase Commit (2PC) é utilizado para fazer a coordenação das transações que envolvem múltiplos bancos para garantir que todas as partes concordem com a transação ou a revertam.
 
-Na estrutura básica de um sistema bancário, cada banco atua de forma independente, mas colaborando através de um protocolo padronizado de envio de mensagens (API REST) para gerenciar contas e um padrão de transações atômicas (Two-Phase Commit) para realizar transações. Então, cada banco deve ser capaz de lidar com suas operações internas e interagir com outros bancos para completar transações que envolvem múltiplas instituições. E esses outros bancos devem fazer parte de um consórcio que é designado no próprio código, no qual é verificado quais estão disponíveis e quais não.
+Na estrutura básica de um sistema bancário, cada banco atua de forma independente, mas colaborando através de um protocolo padronizado de envio de mensagens (API REST) para gerenciar contas e um padrão de transações atômicas (Two-Phase Commit) para realizar transações. Então, cada banco deve ser capaz de lidar com suas operações internas e interagir com outros bancos para completar transações que envolvem múltiplas instituições. E esses outros bancos devem fazer parte de um consórcio que é aplicado no próprio código, no qual é verificado quais estão disponíveis e quais não.
 
 Na Figura 1, é apresentada uma visão geral do sistema distribuído de transações bancárias. Por exemplo, partindo de um consórcio bancário formado por três instituições: Banco A, Banco B e Banco C. Então o cliente pode se cadastrar em qualquer um dos bancos participantes do consórcio. Quando ele está cadastrado, o cliente pode abrir uma conta individual, uma conta jurídica ou uma conta conjunta, dependendo da necessidade. A principal funcionalidade do sistema é a capacidade de realizar transferências entre contas em diferentes bancos que fazem parte do consórcio. A partir de qualquer banco, o cliente pode transferir fundos para uma conta existente em outro banco participante.
 
@@ -246,11 +246,11 @@ Como falado anteriormente, para tratar os problemas de concorrência e garantir 
       - Recebimento e Processamento:
         - Cada Banco Participante recebe a requisição PREPARE e verifica se pode realizar a transação.
         - Se puder, responde com PREPARED {transaction_id}, armazenando um log de preparação.
-        - Caso contrário, responde com ABORT {transaction_id}.
+        - Caso contrário, responde com ABORT.
   2. Fase de Commit/Rollback:
       - Commit da Transação:
-        - Se todos os bancos participantes responderem com PREPARED, o Banco Coordenador envia uma requisição de commit para todos os bancos utilizando conexões HTTP
-        - Mensagem que é enviada: COMMIT {transaction_id}
+        - Se todos os bancos participantes responderem com PREPARED, o Banco Coordenador envia uma requisição de commit para todos os bancos utilizando conexões HTTP.
+        - Mensagem que é enviada: COMMIT.
       - Rollback da Transação:
         - Se algum banco responder com ABORT, o Banco Coordenador envia uma requisição de rollback para todos os bancos utilizando conexões HTTP sobre TCP.
 
