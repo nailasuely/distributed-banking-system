@@ -16,7 +16,7 @@ const Home = () => {
   const [totalCurrentBalance, setTotalCurrentBalance] = useState(0);
   const [accounts, setAccounts] = useState<{ id: string; appwriteItemId: string; name: string; balance: number; numero: string }[]>([]);
   const [onlineBanks, setOnlineBanks] = useState<{ id: string; status: string }[]>([]);
-  const [user, setUser] = useState<{ $id: string; firstName: string }>({ $id: 'user123', firstName: 'Naila' });
+  const [user, setUser] = useState<{ $id: string; firstName: string }>({ $id: 'user123', firstName: '' });
 
   useEffect(() => {
     const fetchData = async () => {
