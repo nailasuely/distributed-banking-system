@@ -260,23 +260,28 @@ Como falado anteriormente, para tratar os problemas de concorrência e garantir 
 A aplicação funciona como um painel de controle para o gerenciamento de contas bancárias, construída com Next.js e TypeScript (TSX). O sistema fornece uma interface de usuário para a criação de clientes, a abertura de novas contas bancárias e a realização de transações financeiras e visualização dos valores das contas. 
 
 <div align="center">
+   <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/tela_principal.png" />
+    <p> Fig 2. Tela inicial </p>
+</div>
+
+<div align="center">
    <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar_cliente.png" />
-    <p> Fig 2. Tela de Adicionar Cliente</p>
+    <p> Fig 3. Tela de Adicionar Cliente</p>
 </div>
 
 <div align="center">
    <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar_conta.png" />
-    <p> Fig 3. Tela de Adicionar Conta </p>
+    <p> Fig 4. Tela de Adicionar Conta </p>
 </div>
 
 <div align="center">
    <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/pix_1.png" />
-    <p> Fig 4. Primeira parte tela de Pix </p>
+    <p> Fig 5. Primeira parte tela de Pix </p>
 </div>
 
 <div align="center">
    <img width="800px" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/pix_2.png" />
-    <p> Fig 5. Segunda parte tela de Pix</p>
+    <p> Fig 6. Segunda parte tela de Pix</p>
 </div>
 
 Para manter as informações dos dispositivos atualizadas, a aplicação realiza chamadas periódicas para o servidor utilizando o método `fetchData`. Essas chamadas são feitas a cada segundo, garantindo que os dados exibidos na interface estejam sempre atualizados.
@@ -289,11 +294,11 @@ Para manter as informações dos dispositivos atualizadas, a aplicação realiza
 
 
 
-Sim. O sistema realiza o gerenciamento de contas por meio através de rotas HTTP POST (Figura 6) , usando a implementação de funções para a criação de contas bancárias. Para isso, é utilizando a classe `Cliente`, que representa um cliente do banco com atributos como CPF, nome e tipo, e a classe `Conta`, que gerencia detalhes como número da conta, saldo e titulares, o sistema permite a criação de clientes e as contas que estão associadas a este cliente. O método `/criar_cliente` adiciona novos clientes ao sistema, verificando se já existem. Para as contas, o método `/criar_conta` assegura que cada conta é única e pode ser individual ou conjunta,  e outros métodos de validação para que não exista problema em contas conjuntas, lembrando que as contas conjuntas nesse sistema permitem até apenas dois participantes. O uso de locks (`Lock`) é feito na criação de conta, pois em um ambiente multithread como é o caso desse sistema ocorre a prevenção de condições de corridas que podem acontecer em um ambiente descentralizado e evita a criação de contas iguais. 
+Sim. O sistema realiza o gerenciamento de contas por meio através de rotas HTTP POST (Figura 7) , usando a implementação de funções para a criação de contas bancárias. Para isso, é utilizando a classe `Cliente`, que representa um cliente do banco com atributos como CPF, nome e tipo, e a classe `Conta`, que gerencia detalhes como número da conta, saldo e titulares, o sistema permite a criação de clientes e as contas que estão associadas a este cliente. O método `/criar_cliente` adiciona novos clientes ao sistema, verificando se já existem. Para as contas, o método `/criar_conta` assegura que cada conta é única e pode ser individual ou conjunta,  e outros métodos de validação para que não exista problema em contas conjuntas, lembrando que as contas conjuntas nesse sistema permitem até apenas dois participantes. O uso de locks (`Lock`) é feito na criação de conta, pois em um ambiente multithread como é o caso desse sistema ocorre a prevenção de condições de corridas que podem acontecer em um ambiente descentralizado e evita a criação de contas iguais. 
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/conta_nova.svg" />
-    <p> Fig 6. Protocolo de criação de conta</p>
+    <p> Fig 7. Protocolo de criação de conta</p>
 </div>
 
 
@@ -307,7 +312,7 @@ Quando a requisição de transferência composta é recebida, o sistema inicia o
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/composta_d.svg" />
-    <p> Fig 7. Exemplo de Transferência Composta </p>
+    <p> Fig 8. Exemplo de Transferência Composta </p>
 </div>
 
 ### Os bancos estão se comunicando com o protocolo adequado?
@@ -342,7 +347,7 @@ O protocolo 2PC segue duas fases principais: a fase de preparação e a fase de 
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/caso_1_sucesso.svg" />
-    <p> Fig 8. Exemplo de de prepare e commit em um caso de sucesso na tranferência </p>
+    <p> Fig 9. Exemplo de de prepare e commit em um caso de sucesso na tranferência </p>
 </div>
 O método `preparar_transacao` realiza a verificação de saldo e reserva os fundos, o que corresponde a uma das verificações cruciais do 2PC antes da fase de commit. Ele assegura que há fundos suficientes e que todas as contas e clientes existem antes de tentar processar a transação. Esta fase também inclui um bloqueio para garantir que a manipulação do saldo das contas seja atômica, para evitar condições de corrida entre transações concorrentes.
 
@@ -381,7 +386,7 @@ Nos testes, além dos realizados diretamente na aplicação React, também foram
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar%20clientes.svg" />
-    <p> Fig 9. Adicionar Clientes</p>
+    <p> Fig 10. Adicionar Clientes</p>
 </div>
 A imagem acima ilustra o teste para adição de clientes ao sistema. O processo é realizado enviando uma solicitação POST para a rota /criar_cliente com os dados necessários, como CPF, nome e tipo de cliente. O teste valida se um cliente novo pode ser adicionado corretamente ao banco, e o retorno esperado é uma confirmação da criação do cliente, com o status HTTP 201 (Criado). 
 
@@ -389,7 +394,7 @@ A imagem acima ilustra o teste para adição de clientes ao sistema. O processo 
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/adicionar_contas.svg" />
-    <p> Fig 10. Adicionar Contas </p>
+    <p> Fig 11. Adicionar Contas </p>
 </div>
 Agora esse teste acima mostra o teste para adição de contas para um cliente. A solicitação POST é feita na rota /criar_conta, onde são fornecidos dados como CPF do cliente, número da conta e saldo inicial, se é conta conjunta e se for quais são os titulares (lembrando que essas duas ultimas são opcionais). Este teste verifica se uma nova conta pode ser criada para um cliente existente, e o retorno esperado é uma confirmação da criação da conta, com o status HTTP 201 (Criado).
 
@@ -397,7 +402,7 @@ Agora esse teste acima mostra o teste para adição de contas para um cliente. A
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/verificacao_clientes.svg" />
-    <p> Fig 11. Informações dos clientes antes do pix </p>
+    <p> Fig 12. Informações dos clientes antes do pix </p>
 </div>
 Nesse testeé exibido o teste para a verificação das informações dos clientes antes do pix. Através de uma solicitação GET para a rota /clientes, é possível visualizar todos os clientes registrados no sistema, o que inclui suas contas e saldos. Este teste é realizado para verificar se os dados dos clientes estão corretamente armazenados antes de realizar uma transação de Pix. O retorno que é esperado é uma lista com todas as informações dos clientes e suas contas.
 
@@ -405,7 +410,7 @@ Nesse testeé exibido o teste para a verificação das informações dos cliente
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/pix.svg" />
-    <p> Fig 12. Realização do Pix </p>
+    <p> Fig 13. Realização do Pix </p>
 </div>
 Nesse momento estamos testando o pix em si entre contas. Utilizando a rota /transferencia_composta, são enviados dados para realizar uma transferência entre contas de diferentes clientes e nesse caso nos diferentes bancos, partindo do Banco 0. O teste verifica se a transação é processada corretamente e se o saldo é ajustado conforme esperado. O retorno esperado é uma confirmação da transação com o status HTTP 200 (OK). 
 
@@ -413,7 +418,7 @@ Nesse momento estamos testando o pix em si entre contas. Utilizando a rota /tran
 
 <div align="center">
    <img width="" src="https://github.com/nailasuely/distributed-banking-system/blob/main/assets/apos_pix.svg" />
-    <p> Fig 13. Informações dos clientes após o pix </p>
+    <p> Fig 14. Informações dos clientes após o pix </p>
 </div>
 A imagem acima mostra o teste para a verificação das informações dos clientes após a transação de Pix. Após a realização de uma transferência, uma nova solicitação GET para a rota /clientes é feita para verificar se as alterações no saldo das contas dos clientes foram aplicadas corretamente. O retorno esperado é uma atualização das informações dos clientes para poder visualizar se após o pix os dados estão corretos. 
 
