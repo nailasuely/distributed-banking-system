@@ -57,12 +57,12 @@ gh repo clone nailasuely/distributed-banking-system
 
 ## Introdução 
 
-A Internet das Coisas (IoT) ganhou destaque nas últimas décadas ao conectar objetos físicos à internet, permitindo a coleta e compartilhamento de dados de forma remota. Segundo Dias (2016), a IoT refere-se a um conceito revolucionário que transforma objetos comuns em dispositivos inteligentes capazes de coletar, transmitir e receber dados, além de responder a comandos de forma autônoma ou interativa. Essa abordagem, proposta por Dias, reforça a ideia de que a IoT não apenas conecta dispositivos, mas também cria novas oportunidades para automação, monitoramento e controle em uma variedade de setores.
+O Pix foi desenvolvido para centralizar o processo de transações financeiras sob a supervisão do Banco Central, garantindo que todas as operações sejam gerenciadas de forma segura (Kosinski, 2021). Esse modelo centralizado permite um controle direto sobre todas as transações e é uma evolução das formas tradicionais de pagamento, oferecendo uma solução rápida e moderna para movimentações financeiras (Kosinski, 2021).
 
-Diante da crescente relevância da IoT, uma empresa direcionou uma startup para desenvolver um serviço que simplifique a comunicação entre dispositivos e aplicações
-A proposta  é criar um serviço de broker que facilite a troca de mensagens entre dispositivos e aplicações, utilizando como base o subsistema de rede TCP/IP.
+Inspirados por esse modelo, esse projeto apresenta uma abordagem um pouco diferente em comparação com o Pix tradicional. Enquanto o Pix opera sob um modelo centralizado, onde o Banco Central atua como um intermediário essencial para todas as transações, nossa solução adota um modelo descentralizado para o gerenciamento de contas e a execução de transferências. A ideia é criar um sistema que permita a realização de transações financeiras sem a necessidade de uma autoridade central, em um ambiente distribuído onde os próprios bancos participantes coordenam as operações diretamente entre si.
 
-Para atender aos requisitos e restrições do projeto, o desenvolvimento foi realizado utilizando Python para o backend, tanto para o serviço broker quanto para o dispositivo virtual, enquanto a aplicação foi desenvolvida em React para a interface do usuário. A comunicação entre os dispositivos virtuais e o serviço broker foi implementada utilizando a interface de socket nativa do TCP/IP para comandos e UDP para dados, enquanto a comunicação entre o serviço broker e a aplicação foi realizada por meio de uma API RESTful.
+Para atender aos requisitos e restrições do projeto, o desenvolvimento foi realizado utilizando Python para o backend e contêineres Docker para isolar e gerenciar os ambientes de cada banco. A comunicação entre os bancos é feita por meio de uma API REST e o protocolo  2PC (Two-Phase Commit) foi utilizado para coordenar transações de forma confiável entre os bancos e os ambientes foram gerenciados usando Docker. 
+
 
 ![-----------------------------------------------------](https://github.com/nailasuely/breakout-problem3/blob/main/assets/img/prancheta.png)
 
