@@ -424,14 +424,27 @@ A imagem acima mostra o teste para a verificação das informações dos cliente
 ## Como utilizar 
 
 1. **Usando Docker:**
-    - Vá até o diretório no qual o `bank` está localizado.
-    - Execute o seguintes comando para iniciar:
-      
-        ```
-        docker-compose up --build
-        ```
-    - Antes, não esqueça de definir o consórcio no código. 
-
+  - Como executar o banco:
+      - Vá até o diretório no qual o `bank` está localizado.
+         ```bash
+        cd distributed-banking-system/bank/app
+         ```
+      - Execute o seguinte comando para iniciar:
+          ```
+          docker-compose up --build
+          ```
+      - Antes, não esqueça de definir o consórcio no código. 
+  - Como executar a interface:
+        - Vá até o diretório principal.
+           ```bash
+           cd distributed-banking-system
+           ```
+        - Execute o seguinte comando para iniciar:
+            ```
+            docker-compose up --build
+            ```
+        - Antes, não esqueça de definir o IP em `components`. 
+    Como executar o banco:
 ![-----------------------------------------------------](https://github.com/nailasuely/breakout-problem3/blob/main/assets/img/prancheta.png)
 ## Conclusão 
 Por fim, o projeto conseguiu desenvolver um sistema para gerenciamento de transações bancárias distribuídas, permitindo a comunicação eficiente entre diferentes bancos e contas. No qual ocorreu a implementação de funcionalidades essenciais como criação de contas, realização de transações, transferências entre bancos e sincronização de dados.
