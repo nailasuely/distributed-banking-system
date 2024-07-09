@@ -34,7 +34,7 @@ gh repo clone nailasuely/distributed-banking-system
   - [Conta](#Classe-Conta)
   - [Banco](#Classe-Banco)
   - [Comunicação entre Bancos](#Comunicação-entre-Bancos)
-- [Discussão](#Discussão-sobre-os-requisitos)
+- [Discussão sobre os requisitos](#Discussão-sobre-os-requisitos)
   - [Gerenciamento de Contas e Transações](#O-sistema-realiza-o-gerenciamento-de-contas-Criar-e-realizar-transações)
   - [Transações Entre Bancos](#É-possível-transacionar-entre-diferentes-bancos-por-exemplo-enviar-do-banco-a-b-b-e-c-para-o-banco-d)
   - [Protocolo de Comunicação](#Os-bancos-estão-se-comunicando-com-o-protocolo-adequado)
